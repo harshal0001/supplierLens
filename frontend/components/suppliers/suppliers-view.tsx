@@ -5,6 +5,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { Plus } from "lucide-react";
 import { api, asApiFailure } from "@/lib/api";
+import { formatWhen } from "@/lib/format";
 import type { SupplierDetail, SupplierSummary } from "@/lib/types";
 import { RiskBadge } from "@/components/risk/risk-badge";
 import { Badge } from "@/components/ui/badge";
@@ -26,11 +27,6 @@ const EMPTY_FORM = {
   criticality: "medium" as Criticality,
 };
 
-function formatDate(value: string | null) {
-  if (!value) return "—";
-  return new Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(new Date(value));
-}
-
 function formatScore(score: number | null) {
   return score == null ? "—" : score.toFixed(1);
 }
@@ -42,6 +38,7 @@ export function SuppliersView() {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
   const [nameError, setNameError] = useState<string | null>(null);
+  const [countryError, setCountryError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -70,10 +67,10 @@ export function SuppliersView() {
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
     setNameError(null);
+    setCountryError(null);
     const country = form.country.trim().toUpperCase();
     if (!/^[A-Z]{2}$/.test(country)) {
-      setNameError(null);
-      toast.error("Country must be a two-letter ISO code.");
+      setCountryError("Country must be a two-letter ISO code.");
       return;
     }
     setSaving(true);
@@ -93,8 +90,19 @@ export function SuppliersView() {
       setOpen(false);
     } catch (cause) {
       const failure = asApiFailure(cause);
-      if (failure.status === 409) setNameError(failure.message);
-      else toast.error(failure.message);
+      if (failure.status === 409) {
+        setNameError(failure.message);
+      } else if (failure.status === 422) {
+        const leftover: string[] = [];
+        for (const part of failure.message.split("; ")) {
+          if (/^name\b/i.test(part)) setNameError(part.replace(/^name:\s*/i, ""));
+          else if (/^country\b/i.test(part)) setCountryError(part.replace(/^country:\s*/i, ""));
+          else leftover.push(part);
+        }
+        if (leftover.length > 0) toast.error(leftover.join("; "));
+      } else {
+        toast.error(failure.message);
+      }
     } finally {
       setSaving(false);
     }
@@ -181,7 +189,7 @@ export function SuppliersView() {
                     )}
                   </TableCell>
                   <TableCell className="text-right tabular-nums">{supplier.document_count}</TableCell>
-                  <TableCell>{formatDate(supplier.last_assessed_at)}</TableCell>
+                  <TableCell>{formatWhen(supplier.last_assessed_at, true)}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -193,7 +201,10 @@ export function SuppliersView() {
         open={open}
         onOpenChange={(next) => {
           setOpen(next);
-          if (!next) setNameError(null);
+          if (!next) {
+            setNameError(null);
+            setCountryError(null);
+          }
         }}
       >
         <DialogContent className="sm:max-w-md">
@@ -220,16 +231,24 @@ export function SuppliersView() {
                 </p>
               ) : null}
             </div>
-            <label className="grid gap-1.5 text-sm font-medium">
+            <label className="grid gap-1.5 text-sm font-medium" htmlFor="supplier-country">
               Country
               <Input
+                id="supplier-country"
                 required
                 maxLength={2}
                 value={form.country}
                 placeholder="DE"
+                aria-invalid={countryError ? true : undefined}
+                aria-describedby={countryError ? "supplier-country-error" : undefined}
                 onChange={(event) => setForm({ ...form, country: event.target.value.toUpperCase() })}
               />
             </label>
+            {countryError ? (
+              <p id="supplier-country-error" className="text-xs text-red-700">
+                {countryError}
+              </p>
+            ) : null}
             <label className="grid gap-1.5 text-sm font-medium">
               Website
               <Input
