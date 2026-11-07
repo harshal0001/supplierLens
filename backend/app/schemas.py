@@ -189,6 +189,8 @@ class DashboardTotals(BaseModel):
     low: int
     insufficient_data: int
     not_assessed: int
+    open_actions: int  # all proposed/approved (open_actions list is capped at 8)
+    open_high_priority: int
 
 
 class DashboardCert(BaseModel):

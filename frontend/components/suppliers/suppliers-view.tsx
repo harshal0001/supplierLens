@@ -146,6 +146,15 @@ export function SuppliersView() {
     );
   }, [query, suppliers, risk]);
 
+  // Every close path (Esc, overlay, Cancel) clears stale validation errors.
+  function changeOpen(next: boolean) {
+    setOpen(next);
+    if (!next) {
+      setNameError(null);
+      setCountryError(null);
+    }
+  }
+
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
     setNameError(null);
@@ -447,16 +456,7 @@ export function SuppliersView() {
           </Table>
         </div>
       )}
-      <Dialog
-        open={open}
-        onOpenChange={(next) => {
-          setOpen(next);
-          if (!next) {
-            setNameError(null);
-            setCountryError(null);
-          }
-        }}
-      >
+      <Dialog open={open} onOpenChange={changeOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Add supplier</DialogTitle>
@@ -525,7 +525,7 @@ export function SuppliersView() {
                   }
                 }}
               >
-                <SelectTrigger className="w-full" aria-label="Criticality">
+                <SelectTrigger className="w-full capitalize" aria-label="Criticality">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -536,7 +536,7 @@ export function SuppliersView() {
               </Select>
             </label>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+              <Button type="button" variant="outline" onClick={() => changeOpen(false)}>
                 Cancel
               </Button>
               <Button type="submit" disabled={saving}>

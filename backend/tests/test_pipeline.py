@@ -172,3 +172,20 @@ def test_missing_document_file_is_404(client):
         Path(db.get(Document, doc["id"]).storage_path).unlink()
     r = client.get(f"/api/documents/{doc['id']}/file")
     assert r.status_code == 404 and r.json()["error"]["code"] == "not_found"
+
+
+def test_dashboard_counts_all_open_actions_not_just_the_listed_8(client):
+    from app import db as dbmod
+    from app.models import Action, Supplier
+    with dbmod.SessionLocal() as db:
+        sup = Supplier(name="Many Actions GmbH", name_key="many actions gmbh", country="DE")
+        db.add(sup)
+        db.flush()
+        db.add_all(Action(supplier_id=sup.id, template_key=f"k{i}", title=f"Action {i}", rationale="r",
+                          priority="high" if i < 4 else "low", status="approved" if i == 0 else "proposed")
+                   for i in range(11))
+        db.add(Action(supplier_id=sup.id, template_key="done", title="Done", rationale="r", priority="high", status="done"))
+        db.commit()
+    d = client.get("/api/dashboard").json()
+    assert len(d["open_actions"]) == 8
+    assert d["totals"]["open_actions"] == 11 and d["totals"]["open_high_priority"] == 4

@@ -585,13 +585,13 @@ function dashboard(): Dashboard {
   const list = suppliers.map(summaryOf);
   const count = (value: SupplierSummary["classification"]) =>
     list.filter((supplier) => supplier.classification === value).length;
-  const open = actions
+  const allOpen = actions
     .filter((action) => action.status === "proposed" || action.status === "approved")
     .sort((a, b) => {
       const rank = { high: 0, medium: 1, low: 2 };
       return rank[a.priority] - rank[b.priority];
-    })
-    .slice(0, 8);
+    });
+  const open = allOpen.slice(0, 8);
   return {
     totals: {
       suppliers: list.length,
@@ -600,6 +600,8 @@ function dashboard(): Dashboard {
       low: count("low"),
       insufficient_data: count("insufficient_data"),
       not_assessed: list.filter((supplier) => supplier.classification == null).length,
+      open_actions: allOpen.length,
+      open_high_priority: allOpen.filter((action) => action.priority === "high").length,
     },
     top_risk: sortedSuppliers().filter((supplier) => supplier.overall_score != null).slice(0, 5),
     certifications: [

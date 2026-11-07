@@ -147,6 +147,8 @@ export interface Dashboard {
     low: number;
     insufficient_data: number;
     not_assessed: number;
+    open_actions: number; // all open; the open_actions list below is capped at 8
+    open_high_priority: number;
   };
   top_risk: SupplierSummary[];
   certifications: {

@@ -81,7 +81,15 @@ export function DashboardView() {
         const open = current.open_actions
           .map((item) => (item.id === updated.id ? updated : item))
           .filter((item) => item.status === "proposed" || item.status === "approved");
-        return { ...current, open_actions: open };
+        const closed = updated.status === "rejected" || updated.status === "done"; // approved stays open
+        const totals = closed
+          ? {
+              ...current.totals,
+              open_actions: current.totals.open_actions - 1,
+              open_high_priority: current.totals.open_high_priority - (updated.priority === "high" ? 1 : 0),
+            }
+          : current.totals;
+        return { ...current, totals, open_actions: open };
       });
       toast.success(status === "approved" ? "Action approved" : "Action rejected");
     } catch (cause) {
@@ -91,9 +99,14 @@ export function DashboardView() {
     }
   }
 
+  // Scroll instead of href="#…": a native hash link adds a history entry the Next router can't restore on Back.
+  function scrollTo(id: string) {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
   function focusMatrix(next: RiskKey | null) {
     setFilter(next);
-    document.getElementById("risk-matrix")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    scrollTo("risk-matrix");
   }
 
   if (error) {
@@ -141,7 +154,6 @@ export function DashboardView() {
   }
 
   const expired = data.certifications.filter((certificate) => certificate.days_left < 0).length;
-  const highPriority = data.open_actions.filter((action) => action.priority === "high").length;
 
   return (
     <TooltipProvider>
@@ -171,16 +183,16 @@ export function DashboardView() {
             value={data.certifications.length}
             caption={expired ? `${expired} already expired` : "Within 90 days"}
             accent="var(--risk-medium)"
-            href="#certificates"
+            onClick={() => scrollTo("certificates")}
             delay={150}
           />
           <KpiTile
             icon={ClipboardList}
             label="Open actions"
-            value={data.open_actions.length}
-            caption={`${highPriority} high priority`}
+            value={data.totals.open_actions}
+            caption={`${data.totals.open_high_priority} high priority`}
             accent="var(--ring)"
-            href="#actions"
+            onClick={() => scrollTo("actions")}
             delay={225}
           />
         </section>
@@ -211,7 +223,6 @@ function KpiTile({
   caption,
   accent,
   onClick,
-  href,
   delay,
 }: {
   icon: typeof Building2;
@@ -219,8 +230,7 @@ function KpiTile({
   value: number;
   caption: string;
   accent: string;
-  onClick?: () => void;
-  href?: string;
+  onClick: () => void;
   delay: number;
 }) {
   const body = (
@@ -250,11 +260,7 @@ function KpiTile({
     "animate-in fill-mode-both fade-in slide-in-from-bottom-2 duration-500",
   );
   const style = { animationDelay: `${delay}ms` };
-  return href ? (
-    <a href={href} className={className} style={style}>
-      {body}
-    </a>
-  ) : (
+  return (
     <button type="button" onClick={onClick} className={className} style={style}>
       {body}
     </button>
