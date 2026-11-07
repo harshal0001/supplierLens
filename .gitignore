@@ -13,4 +13,3 @@ __pycache__/
 demo-data/out/
 backend/data*/
 .claude/worktrees/
-presenter-notes/

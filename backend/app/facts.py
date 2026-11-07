@@ -1,4 +1,4 @@
-"""Schema for facts the LLM extracts from a document (CONTRACT §5.1).
+"""Schema for facts the LLM extracts from a document.
 
 Every fact carries a verbatim quote + page; extraction.verify_quotes() drops any fact whose quote is not in the source.
 """

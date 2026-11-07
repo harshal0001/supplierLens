@@ -1,4 +1,4 @@
-"""External web research via Exa → classified, verified signals (CONTRACT §5.2)."""
+"""External web research via Exa → classified, verified signals."""
 
 import logging
 import re

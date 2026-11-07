@@ -1,6 +1,6 @@
 # SupplierLens backend
 
-FastAPI + SQLite + Claude + Exa. API contract: `../docs/CONTRACT.md`.
+FastAPI + SQLite + Claude + Exa + ElevenLabs. Architecture, scoring and API overview: `../README.md`.
 
 ## Run
 ```bash
@@ -19,7 +19,7 @@ WSL with the repo on `/mnt/c` or `/mnt/e`: put the venv on the Linux filesystem 
 - `POST /api/suppliers/{id}/analyze` starts a background run: **process_documents** (pypdf text → page chunks →
   Claude extracts facts, each with a verbatim quote that is checked against the PDF, so unverifiable facts are dropped) →
   **external_research** (Exa → Claude Haiku classifies into fixed signal types, excerpt must be in the source) →
-  **score** (`services/risk_engine.py`, deterministic rules + formula from CONTRACT §5) → **recommend** (rule-based
+  **score** (`services/risk_engine.py`, deterministic rules + weighted formula) → **recommend** (rule-based
   action plan + labelled AI summary). Web research failing doesn't fail the run.
 - `POST /api/assistant/query`: Claude tool-use loop over read-only tools (`services/assistant.py`). Only evidence ids
   actually returned by tools are kept as citations.

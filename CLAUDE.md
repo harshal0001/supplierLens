@@ -5,17 +5,17 @@ These rules are binding for every coding agent in this repo. If anything here co
 ## 1. Startup routine (do this every session, in order)
 The user will say **"I am Harshal"** or **"I am Pranam"**. Then, without further questions:
 1. `git switch main && git pull --rebase`. If the working tree is dirty, stop and show `git status` to the human.
-2. Read `docs/CONTRACT.md` fully (API shapes, data model, scoring rules).
+2. Read `README.md` (architecture, scoring rules, API overview).
 3. Check open PRs (`gh pr list`). Don't start a task that already has an open PR.
 4. Ask your human which task to work on. One task at a time, following §3.
 
-## 2. Ownership (who may edit what) — see CONTRACT §2 for the full table
+## 2. Ownership (who may edit what)
 | Harshal | Pranam | Shared (both humans must agree) |
 |---|---|---|
-| `backend/**` except `backend/app/api/voice.py` | `frontend/**`, `demo-data/**`, `scripts/**`, `backend/app/api/voice.py` | `docs/CONTRACT.md`, `CLAUDE.md`, `.env.example`, `.github/**` |
+| `backend/**` except `backend/app/api/voice.py` | `frontend/**`, `demo-data/**`, `scripts/**`, `backend/app/api/voice.py` | `CLAUDE.md`, `.env.example`, `.github/**` |
 
 - Touch only your own paths. If a task needs a change elsewhere, **stop and tell your human exactly what's needed** (file, change, why).
-- The API shapes in CONTRACT §4 are exact. Never "work around" a mismatch: report it.
+- API shapes must match between `backend/app/schemas.py` and `frontend/lib/types.ts`. Never "work around" a mismatch: report it.
 
 ## 3. Git workflow (branch → PR → checks → merge)
 1. Branch from fresh `main`: `git switch -c <harshal|pranam>/<task-id>-<slug>` (e.g. `pranam/p4-supplier-detail`).
