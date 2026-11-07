@@ -103,6 +103,15 @@ export interface RiskAssessment {
   created_at: string;
 }
 
+export interface RiskHistoryPoint {
+  id: number;
+  overall_score: number | null;
+  classification: Classification;
+  confidence: number;
+  coverage: number;
+  created_at: string;
+}
+
 export interface ExternalSignal {
   id: number;
   title: string;
