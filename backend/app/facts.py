@@ -64,4 +64,4 @@ class DocumentExtraction(BaseModel):
     financials: Financials | None = None
     delivery: Delivery | None = None
     contract: ContractTerms | None = None
-    concerns: list[Concern] = Field(default_factory=list, max_length=5)
+    concerns: list[Concern] = Field(default_factory=list, description="At most 5")  # truncated in verify_quotes, not rejected

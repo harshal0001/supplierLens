@@ -1,6 +1,8 @@
 """Thin Claude wrapper: structured (tool-forced JSON → Pydantic) and plain text."""
 
+import html
 import logging
+import re
 from typing import TypeVar
 
 import anthropic
@@ -62,3 +64,16 @@ def text(system: str, user: str, *, model: str | None = None, max_tokens: int = 
     msg = _create(model=model or settings.llm_model, max_tokens=max_tokens, system=system,
                   messages=[{"role": "user", "content": user}])
     return "".join(b.text for b in msg.content if b.type == "text").strip()
+
+
+_TAG = re.compile(r"<\s*/?\s*untrusted_document", re.IGNORECASE)
+
+
+def fence(content: str) -> str:
+    """Neutralise our delimiter inside untrusted text so it can't close <untrusted_document> early."""
+    return _TAG.sub("[tag removed]", content or "")
+
+
+def attr(value: str) -> str:
+    """Untrusted value safe for an XML-ish attribute inside the prompt."""
+    return html.escape(fence(value), quote=True)

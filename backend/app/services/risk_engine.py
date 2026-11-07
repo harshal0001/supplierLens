@@ -225,8 +225,7 @@ def build_indicators(supplier: SupplierInput, docs: list[DocInput], signals: lis
 def classify(overall: float | None, coverage: float) -> str:
     if overall is None or coverage < 0.5:
         return "insufficient_data"
-    r = round(overall)
-    return "low" if r <= 30 else "medium" if r <= 60 else "high"
+    return "low" if overall <= 30 else "medium" if overall <= 60 else "high"  # CONTRACT §5.3: low ≤ 30 < medium ≤ 60 < high
 
 
 def score(indicators: list[IndicatorDraft]) -> AssessmentDraft:

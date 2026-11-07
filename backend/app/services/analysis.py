@@ -1,6 +1,7 @@
 """Analysis pipeline (CONTRACT §5.5): process_documents → external_research → score → recommend."""
 
 import logging
+import time
 from datetime import UTC, date, datetime
 from pathlib import Path
 
@@ -23,6 +24,31 @@ def new_steps() -> list[dict]:
 
 
 def run(run_id: int) -> None:
+    """Never raises and never leaves the run queued/running: any crash is recorded via a fresh session."""
+    try:
+        _run(run_id)
+    except Exception as e:
+        log.exception("run %s crashed", run_id)
+        _mark_failed(run_id, str(getattr(e, "message", None) or e)[:300])
+
+
+def _mark_failed(run_id: int, error: str, attempts: int = 5) -> None:
+    for i in range(attempts):  # the DB may be briefly locked by another writer
+        try:
+            with dbmod.SessionLocal() as db:
+                r = db.get(AnalysisRun, run_id)
+                if r is not None and r.status in ("queued", "running"):
+                    r.status, r.error, r.finished_at = "failed", error, datetime.now(UTC)
+                    r.steps = [{**x, "status": "failed", "error": x["error"] or error} if x["status"] == "running"
+                               else x for x in r.steps]
+                    db.commit()
+            return
+        except Exception:
+            log.exception("could not mark run %s failed (attempt %s)", run_id, i + 1)
+            time.sleep(1)
+
+
+def _run(run_id: int) -> None:
     with dbmod.SessionLocal() as db:
         r = db.get(AnalysisRun, run_id)
         sup = db.get(Supplier, r.supplier_id)
@@ -42,20 +68,15 @@ def run(run_id: int) -> None:
                 _set(db, r, name, "failed", str(getattr(e, "message", None) or e)[:300])
                 return False
 
-        try:
-            step("process_documents", lambda: _process_documents(db, sup))
-            step("external_research", lambda: _research(db, sup))
-            ok = step("score", lambda: _score(db, sup, r, ctx))
-            if ok:
-                step("recommend", lambda: _recommend(db, sup, ctx))
-            else:
-                _set(db, r, "recommend", "failed", "skipped: scoring failed")
-            r.status = "succeeded" if ok else "failed"
-            r.error = None if ok else "Scoring failed"
-        except Exception as e:  # never leave a run stuck in "running"
-            log.exception("run %s crashed", run_id)
-            db.rollback()
-            r.status, r.error = "failed", str(e)[:300]
+        step("process_documents", lambda: _process_documents(db, sup))
+        step("external_research", lambda: _research(db, sup))
+        ok = step("score", lambda: _score(db, sup, r, ctx))
+        if ok:
+            step("recommend", lambda: _recommend(db, sup, ctx))
+        else:
+            _set(db, r, "recommend", "failed", "skipped: scoring failed")
+        r.status = "succeeded" if ok else "failed"
+        r.error = None if ok else "Scoring failed"
         r.finished_at = datetime.now(UTC)
         db.commit()
 
@@ -78,12 +99,13 @@ def _process_documents(db, sup: Supplier) -> str | None:
         d.status, d.error = "processing", None
         db.commit()
         try:
+            # Slow work (PDF parsing + LLM) first, with no write transaction open: SQLite has a single writer lock.
             pages = extraction.extract_pages(Path(d.storage_path))
+            ex = extraction.extract_facts(pages, d.filename)
             db.execute(delete(Chunk).where(Chunk.document_id == d.id))
             db.add_all(Chunk(document_id=d.id, supplier_id=sup.id, page_number=n, content=t)
                        for n, t in extraction.chunk_pages(pages))
             d.page_count = len(pages)
-            ex = extraction.extract_facts(pages, d.filename)
             if ex.doc_type != "other" or d.doc_type == "other":
                 d.doc_type = ex.doc_type
             d.extracted = ex.model_dump(mode="json")

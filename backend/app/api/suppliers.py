@@ -77,5 +77,6 @@ def document_file(document_id: int, db: Session = Depends(get_db)):
     doc = db.get(Document, document_id)
     if doc is None:
         raise AppError(404, "Document not found")
-    return FileResponse(doc.storage_path, media_type="application/pdf",
-                        headers={"Content-Disposition": f'inline; filename="{doc.filename}"'})
+    # filename= lets Starlette RFC 5987-encode non-Latin-1 names (a raw header would crash on "–" or CJK)
+    return FileResponse(doc.storage_path, media_type="application/pdf", filename=doc.filename,
+                        content_disposition_type="inline")

@@ -52,7 +52,8 @@ def supplier_detail(db: Session, sup: Supplier) -> s.SupplierDetail:
     return s.SupplierDetail(
         **summaries(db, [sup])[0].model_dump(), website=sup.website,
         documents=[s.SupplierDocument.model_validate(d) for d in docs],
-        missing_documents=missing_documents({d.doc_type for d in docs}, sup.criticality),
+        # Failed documents don't count as "on file"; ones still being processed do (avoids a false "missing").
+        missing_documents=missing_documents({d.doc_type for d in docs if d.status != "failed"}, sup.criticality),
         latest_run=s.AnalysisRunOut.model_validate(run) if run else None)
 
 

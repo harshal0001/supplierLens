@@ -183,9 +183,15 @@ class _Turn:
             result = fn(**args) if fn else {"error": f"Unknown tool {name}"}
         except AppError as e:
             result = {"error": e.message}
-        except TypeError as e:
-            result = {"error": f"Bad arguments: {e}"}
-        return json.dumps(result, default=str, ensure_ascii=False)[:MAX_TOOL_CHARS]
+        except (TypeError, ValueError) as e:  # model sent wrong/mistyped arguments: let it correct itself
+            result = {"error": f"Bad arguments for {name}: {e}"}
+        except Exception:
+            self.db.rollback()
+            log.exception("tool %s failed", name)
+            result = {"error": f"{name} failed temporarily, answer without it"}
+        # Tool output carries document/web text: fence it as untrusted data (CONTRACT §7).
+        body = llm.fence(json.dumps(result, default=str, ensure_ascii=False)[:MAX_TOOL_CHARS])
+        return f"<untrusted_document>\n{body}\n</untrusted_document>"
 
 
 _MARK = re.compile(r"\s*\[E:\s*([^\]]+)\]")

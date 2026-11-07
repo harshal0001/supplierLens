@@ -2,6 +2,7 @@ from datetime import date
 
 from fastapi import APIRouter, BackgroundTasks, Depends
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app import schemas as s
@@ -17,13 +18,22 @@ router = APIRouter(prefix="/api")
 @router.post("/suppliers/{supplier_id}/analyze", response_model=s.AnalysisRunOut, status_code=202)
 def analyze(supplier_id: int, bg: BackgroundTasks, db: Session = Depends(get_db)):
     queries.supplier_or_404(db, supplier_id)
-    active = db.scalar(select(AnalysisRun).where(AnalysisRun.supplier_id == supplier_id,
-                                                 AnalysisRun.status.in_(["queued", "running"])))
-    if active:
-        return active
+
+    def active():
+        return db.scalar(select(AnalysisRun).where(AnalysisRun.supplier_id == supplier_id,
+                                                   AnalysisRun.status.in_(["queued", "running"])))
+
+    if existing := active():
+        return existing
     run = AnalysisRun(supplier_id=supplier_id, steps=analysis.new_steps())
     db.add(run)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:  # a concurrent request created the active run first (uq_active_run)
+        db.rollback()
+        if existing := active():
+            return existing
+        raise AppError(409, "An analysis was just started for this supplier, try again")
     # shortcut: in-process BackgroundTasks, lost on restart (recovered as failed); use a job queue for >1 instance
     bg.add_task(analysis.run, run.id)
     return run

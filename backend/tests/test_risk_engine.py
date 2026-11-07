@@ -112,7 +112,8 @@ def test_not_assessed_is_not_low():
     assert a.coverage == 0.7 and a.overall_score == 80 and a.classification == "high"
 
 
-@pytest.mark.parametrize("s,c", [(30, "low"), (30.4, "low"), (31, "medium"), (60, "medium"), (61, "high")])
+@pytest.mark.parametrize("s,c", [(30, "low"), (30.1, "medium"), (30.5, "medium"), (60, "medium"),
+                                 (60.1, "high"), (61, "high")])
 def test_classification_bounds(s, c):
     assert re_.classify(s, 1.0) == c
 
