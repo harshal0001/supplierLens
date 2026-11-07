@@ -49,7 +49,7 @@ Frontend (`cd frontend`):
 ```bash
 pnpm install
 pnpm dev                                              # http://localhost:3000 (NEXT_PUBLIC_API_MOCK=1 → mocks, 0 → real API)
-pnpm lint && pnpm exec tsc --noEmit && pnpm build     # must pass before every frontend PR
+pnpm lint && pnpm typecheck && pnpm build            # must pass before every frontend PR (typecheck runs next typegen first)
 ```
 CI (`.github/workflows/ci.yml`, once merged) runs the same checks on every PR.
 

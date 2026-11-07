@@ -17,7 +17,7 @@ _hits: dict[str, deque] = defaultdict(deque)
 def rate_limit(request: Request, limit: int = 20, window: float = 60.0) -> None:
     """shortcut: per-process sliding window keyed by client IP; use Redis when running >1 instance."""
     now = time.monotonic()
-    q = _hits[request.client.host if request.client else "?"]
+    q = _hits[f"{request.client.host if request.client else '?'}:{request.url.path}"]  # per client, per endpoint
     while q and now - q[0] > window:
         q.popleft()
     if len(q) >= limit:

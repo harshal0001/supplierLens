@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     elevenlabs_api_key: str = ""
     elevenlabs_voice_id: str = ""
     elevenlabs_tts_model: str = "eleven_multilingual_v2"
-    elevenlabs_stt_model: str = "scribe_v1"
+    elevenlabs_stt_model: str = "scribe_v2"
     cors_origins: str = "http://localhost:3000"
     max_upload_mb: int = 20
     data_dir: Path = BACKEND_DIR / "data"

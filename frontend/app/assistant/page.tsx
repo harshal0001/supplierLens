@@ -1,11 +1,7 @@
-export default function AssistantPage() {
-  return (
-    <header className="space-y-1">
-      <p className="text-sm font-medium text-sky-800">Assistant</p>
-      <h1 className="text-2xl font-semibold tracking-tight">Ask SupplierLens</h1>
-      <p className="max-w-xl text-sm text-muted-foreground">
-        Ask in text or by voice. Answers stay tied to evidence.
-      </p>
-    </header>
-  );
+import { AssistantView } from "@/components/assistant/assistant-view";
+
+export default async function AssistantPage({ searchParams }: PageProps<"/assistant">) {
+  const raw = (await searchParams).supplier_id;
+  const id = Number(Array.isArray(raw) ? raw[0] : raw);
+  return <AssistantView initialSupplierId={Number.isInteger(id) && id > 0 ? id : null} />;
 }
