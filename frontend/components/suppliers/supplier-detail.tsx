@@ -157,13 +157,15 @@ export function SupplierDetailView({ supplierId }: { supplierId: number }) {
       void api<AnalysisRun>(`/api/runs/${runId}`)
         .then(async (next) => {
           if (cancelled) return;
-          setRun(next);
           if (next.status === "succeeded" || next.status === "failed") {
+            // Reload before setRun: setRun ends this effect (runStatus changes) and would cancel the reload.
             const detail = await api<SupplierDetail>(`/api/suppliers/${supplierId}`);
             if (cancelled) return;
             setSupplier(detail);
             await loadEvidence(supplierId);
+            if (cancelled) return;
           }
+          setRun(next);
         })
         .catch((cause: unknown) => {
           if (!cancelled) toast.error(asApiFailure(cause).message, { id: "run-poll" }); // one toast, not one per poll
@@ -381,7 +383,11 @@ export function SupplierDetailView({ supplierId }: { supplierId: number }) {
                   <span>
                     {STEP_LABEL[step.name]}
                     <span className="sr-only"> {step.status}</span>
-                    {step.error ? <span className="mt-0.5 block text-xs text-red-700">{step.error}</span> : null}
+                    {step.error ? (
+                      <span className={cn("mt-0.5 block text-xs", step.status === "failed" ? "text-red-700" : "text-muted-foreground")}>
+                        {step.error}
+                      </span>
+                    ) : null}
                   </span>
                 </li>
               ))}

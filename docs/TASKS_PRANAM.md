@@ -67,10 +67,10 @@ frontend/
   fallback `audio/mp4`) → `/api/voice/transcribe` → show transcript → `/api/assistant/query` → show answer → `/api/voice/speak` → play.
   Visible state: Listening… / Transcribing… / Thinking… / Speaking… (with Stop). Mic denied → toast + text fallback. `aria-live` on status.
 
-- [ ] **P8. Switch to real API (⏱ T+3:30)**: `NEXT_PUBLIC_API_MOCK=0`, run `seed_demo.py`, click through every page, fix mismatches (if the
+- [x] **P8. Switch to real API (⏱ T+3:30)**: `NEXT_PUBLIC_API_MOCK=0`, run `seed_demo.py`, click through every page, fix mismatches (if the
   backend deviates from CONTRACT, tell Harshal; don't work around it silently).
 
-- [ ] **P9. (T+5:00–6:00) Demo + pitch**: `docs/DEMO_SCRIPT.md` with the CONCEPT §12 10-step flow: exact clicks, the 3 voice questions to ask
+- [x] **P9. (T+5:00–6:00) Demo + pitch**: `docs/DEMO_SCRIPT.md` with the CONCEPT §12 10-step flow: exact clicks, the 3 voice questions to ask
   ("Which supplier has the highest risk and why?", "What should we do about Alpha?", one in German), expected answers, and a fallback per step
   (pre-seeded data if analysis is slow; typed question if mic fails). 8-slide deck (CONCEPT §14) + 60-second pitch. Record a backup demo video.
   Optional only if a URL is required: deploy frontend to Vercel (root `frontend/`).

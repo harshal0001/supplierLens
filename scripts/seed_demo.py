@@ -2,7 +2,7 @@
 
 Re-runnable: a supplier whose name already exists is skipped.
 
-    python scripts/seed_demo.py --api http://localhost:8000
+    python scripts/seed_demo.py --api http://localhost:8000 [--skip alpha-delivery-performance.pdf]
 """
 
 import argparse
@@ -97,6 +97,8 @@ def analyze_and_wait(api: str, supplier_id: int, name: str) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--api", default="http://localhost:8000")
+    parser.add_argument("--skip", action="append", default=[], metavar="FILE",
+                        help="don't upload this PDF (e.g. alpha-delivery-performance.pdf, to upload it live in the demo)")
     args = parser.parse_args()
     api = args.api.rstrip("/")
     names = existing_names(api)
@@ -118,7 +120,7 @@ def main() -> None:
             message = body.get("error", {}).get("message", body) if isinstance(body, dict) else body
             fail(f"Create failed for {supplier['name']} ({status}): {message}")
         print(f"created {supplier['name']} (id {body['id']})")
-        upload(api, body["id"], list(supplier["files"]))
+        upload(api, body["id"], [f for f in supplier["files"] if f not in args.skip])
         analyze_and_wait(api, body["id"], supplier["name"])
 
 
