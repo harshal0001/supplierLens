@@ -57,7 +57,10 @@ export function AssistantView({ initialSupplierId }: { initialSupplierId: number
     return () => audio.current?.pause();
   }, []);
 
-  useEffect(() => bottom.current?.scrollIntoView({ behavior: "smooth", block: "end" }), [messages]);
+  useEffect(() => {
+    // Braces matter: newer Chromium returns a Promise from scrollIntoView, and React would call it as a cleanup.
+    bottom.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [messages]);
 
   function stopSpeaking() {
     audio.current?.pause();

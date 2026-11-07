@@ -148,12 +148,16 @@ evidence. No advice beyond the facts, no markdown."""
 
 def _recommend(db, sup: Supplier, ctx: dict) -> str | None:
     a, inds, row = ctx["draft"], ctx["indicators"], ctx["assessment"]
-    open_keys = set(db.scalars(select(Action.template_key).where(
-        Action.supplier_id == sup.id, Action.status.in_(["proposed", "approved"]))).all())
+    open_actions = {x.template_key: x for x in db.scalars(select(Action).where(
+        Action.supplier_id == sup.id, Action.status.in_(["proposed", "approved"])))}
     for x in engine.plan_actions(a, inds, sup.criticality, ctx["doc_types"]):
-        if x.template_key not in open_keys:
+        existing = open_actions.get(x.template_key)
+        if existing is None:
             db.add(Action(supplier_id=sup.id, assessment_id=row.id, template_key=x.template_key, title=x.title,
                           rationale=x.rationale, priority=x.priority))
+        elif existing.status == "proposed":  # refresh wording to the latest assessment; approved ones stay as approved
+            existing.title, existing.rationale, existing.priority = x.title, x.rationale, x.priority
+            existing.assessment_id = row.id
     db.commit()
     lines = [f"- [{i.category}] {i.label}{f' ({i.value})' if i.value else ''}: severity {i.severity:.0f}, "
              f"basis {i.basis}" for i in inds]
