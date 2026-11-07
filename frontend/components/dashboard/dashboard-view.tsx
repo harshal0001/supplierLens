@@ -91,9 +91,14 @@ export function DashboardView() {
     }
   }
 
+  // Scroll instead of href="#…": a native hash link adds a history entry the Next router can't restore on Back.
+  function scrollTo(id: string) {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
   function focusMatrix(next: RiskKey | null) {
     setFilter(next);
-    document.getElementById("risk-matrix")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    scrollTo("risk-matrix");
   }
 
   if (error) {
@@ -171,7 +176,7 @@ export function DashboardView() {
             value={data.certifications.length}
             caption={expired ? `${expired} already expired` : "Within 90 days"}
             accent="var(--risk-medium)"
-            href="#certificates"
+            onClick={() => scrollTo("certificates")}
             delay={150}
           />
           <KpiTile
@@ -180,7 +185,7 @@ export function DashboardView() {
             value={data.open_actions.length}
             caption={`${highPriority} high priority`}
             accent="var(--ring)"
-            href="#actions"
+            onClick={() => scrollTo("actions")}
             delay={225}
           />
         </section>
@@ -211,7 +216,6 @@ function KpiTile({
   caption,
   accent,
   onClick,
-  href,
   delay,
 }: {
   icon: typeof Building2;
@@ -219,8 +223,7 @@ function KpiTile({
   value: number;
   caption: string;
   accent: string;
-  onClick?: () => void;
-  href?: string;
+  onClick: () => void;
   delay: number;
 }) {
   const body = (
@@ -250,11 +253,7 @@ function KpiTile({
     "animate-in fill-mode-both fade-in slide-in-from-bottom-2 duration-500",
   );
   const style = { animationDelay: `${delay}ms` };
-  return href ? (
-    <a href={href} className={className} style={style}>
-      {body}
-    </a>
-  ) : (
+  return (
     <button type="button" onClick={onClick} className={className} style={style}>
       {body}
     </button>
