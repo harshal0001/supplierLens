@@ -1,4 +1,4 @@
-"""Deterministic, explainable risk scoring (CONTRACT §5.2–5.4). Pure functions: no DB, no LLM."""
+"""Deterministic, explainable risk scoring. Pure functions: no DB, no LLM."""
 
 import re
 import secrets
@@ -229,7 +229,7 @@ def build_indicators(supplier: SupplierInput, docs: list[DocInput], signals: lis
 def classify(overall: float | None, coverage: float) -> str:
     if overall is None or coverage < 0.5:
         return "insufficient_data"
-    return "low" if overall <= 30 else "medium" if overall <= 60 else "high"  # CONTRACT §5.3: low ≤ 30 < medium ≤ 60 < high
+    return "low" if overall <= 30 else "medium" if overall <= 60 else "high"  # low ≤ 30 < medium ≤ 60 < high
 
 
 def score(indicators: list[IndicatorDraft]) -> AssessmentDraft:

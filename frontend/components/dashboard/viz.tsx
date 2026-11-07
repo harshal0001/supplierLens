@@ -21,7 +21,7 @@ export function riskKey(classification: Classification | null): RiskKey {
   return classification ?? "not_assessed";
 }
 
-/** Same bands as the risk engine (CONTRACT §5.3): low ≤ 30 < medium ≤ 60 < high. */
+/** Same bands as the risk engine: low ≤ 30 < medium ≤ 60 < high. */
 export function bandFor(score: number | null): RiskKey {
   if (score == null) return "not_assessed";
   return score <= 30 ? "low" : score <= 60 ? "medium" : "high";

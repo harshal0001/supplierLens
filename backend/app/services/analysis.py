@@ -1,4 +1,4 @@
-"""Analysis pipeline (CONTRACT §5.5): process_documents → external_research → score → recommend."""
+"""Analysis pipeline: process_documents → external_research → score → recommend."""
 
 import logging
 import time

@@ -1,4 +1,4 @@
-"""API shapes — must match docs/CONTRACT.md §4 exactly."""
+"""API shapes — must match frontend/lib/types.ts exactly."""
 
 from datetime import UTC, datetime
 from typing import Annotated, Literal

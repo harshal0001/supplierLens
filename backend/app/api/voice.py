@@ -1,4 +1,4 @@
-"""Voice proxy (CONTRACT §4): ElevenLabs Speech-to-Text and Text-to-Speech. The API key never reaches the browser."""
+"""Voice proxy: ElevenLabs Speech-to-Text and Text-to-Speech. The API key never reaches the browser."""
 
 import logging
 from typing import Annotated
