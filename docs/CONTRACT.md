@@ -25,7 +25,7 @@ Anything else is out of scope.
 | Search over docs | Keyword match over stored page chunks (no embeddings). `# shortcut: keyword search, swap to pgvector embeddings later` |
 | Background work | FastAPI `BackgroundTasks` + `analysis_runs` row the frontend polls |
 | Risk score | **Deterministic Python** (§5). The LLM never produces a score. It only extracts quoted facts, classifies signals into a fixed enum, and writes a labelled summary |
-| Git | Both push to `main` directly. Small commits; `git pull --rebase` before every push. No force push. Ownership below keeps conflicts near zero |
+| Git | Branch per task → PR → CI green → squash merge (rules in `CLAUDE.md` §3). Self-merge allowed only for PRs touching your own paths. Never push to `main` directly |
 | Ports | backend `:8000`, frontend `:3000` |
 
 ## 2. Ownership
@@ -56,7 +56,7 @@ Python deps for `scripts/` and `voice.py` go in `backend/pyproject.toml`. Pranam
 
 ## 4. REST API (prefix `/api`, JSON)
 
-Errors: `{"error": {"code": string, "message": string}}` with proper HTTP status (400/404/409/413/415/429/502/500).
+Errors: `{"error": {"code": string, "message": string}}` with proper HTTP status (400/404/409/413/415/422 validation/429/502/500).
 
 ```ts
 // Pranam copies these verbatim into frontend/lib/types.ts
