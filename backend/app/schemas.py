@@ -3,7 +3,8 @@
 from datetime import UTC, datetime
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, PlainSerializer, field_validator
+from fastapi import Path
+from pydantic import BaseModel, ConfigDict, Field, PlainSerializer, StringConstraints, field_validator
 
 
 def _iso_utc(dt: datetime) -> str:
@@ -12,6 +13,9 @@ def _iso_utc(dt: datetime) -> str:
 
 
 UtcDatetime = Annotated[datetime, PlainSerializer(_iso_utc, return_type=str)]
+
+MAX_ID = 2**63 - 1  # SQLite INTEGER; a larger id would crash the driver (500) instead of a clean 422
+DbId = Annotated[int, Path(le=MAX_ID)]
 
 Classification = Literal["low", "medium", "high", "insufficient_data"]
 Category = Literal["financial", "operational", "delivery", "compliance", "external"]
@@ -208,8 +212,8 @@ class ChatTurn(BaseModel):
 
 
 class AssistantQuery(BaseModel):
-    question: str = Field(min_length=1, max_length=1000)
-    supplier_id: int | None = None
+    question: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=1000)]
+    supplier_id: int | None = Field(default=None, le=MAX_ID)
     history: list[ChatTurn] = Field(default_factory=list, max_length=12)
 
 

@@ -160,3 +160,15 @@ def test_assistant_unknown_supplier_tool(client, monkeypatch):
     monkeypatch.setattr(llm, "_create", fake_create)
     r = client.post("/api/assistant/query", json={"question": "Risk of supplier 4242?"}).json()
     assert "No supplier with id 4242" in seen[1] and r["citations"] == []
+
+
+def test_missing_document_file_is_404(client):
+    from pathlib import Path
+    sid = make_supplier(client)
+    doc = client.post(f"/api/suppliers/{sid}/documents", files=[("files", ("a.pdf", PDF, "application/pdf"))]).json()[0]
+    from app import db as dbmod
+    from app.models import Document
+    with dbmod.SessionLocal() as db:
+        Path(db.get(Document, doc["id"]).storage_path).unlink()
+    r = client.get(f"/api/documents/{doc['id']}/file")
+    assert r.status_code == 404 and r.json()["error"]["code"] == "not_found"

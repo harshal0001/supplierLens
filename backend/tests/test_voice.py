@@ -70,3 +70,8 @@ def test_retries_once_then_fails(monkeypatch):
 def test_validation_message_has_no_pydantic_prefix(client):
     msg = client.post("/api/suppliers", json={"name": "X", "country": "Germany"}).json()["error"]["message"]
     assert msg == "country: country must be a 2-letter ISO code"
+
+
+def test_speak_rejects_blank_text_without_calling_provider(client, calls):
+    assert client.post("/api/voice/speak", json={"text": "   \n "}).status_code == 422
+    assert calls == []
