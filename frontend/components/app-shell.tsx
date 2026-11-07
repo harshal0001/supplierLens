@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, MessagesSquare, Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Logo } from "@/components/logo";
 
 const NAV = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -53,19 +54,23 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-svh bg-background">
       <aside className="sticky top-0 hidden h-svh w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground md:flex">
-        <div className="px-5 py-6">
-          <p className="text-xs font-medium tracking-[0.16em] text-sidebar-foreground/60 uppercase">
-            Procurement
-          </p>
-          <p className="mt-1 text-lg font-semibold tracking-tight">SupplierLens</p>
-        </div>
+        <Link href="/dashboard" className="flex items-center gap-3 rounded-lg px-5 py-6 outline-none focus-visible:ring-3 focus-visible:ring-ring/50">
+          <Logo className="size-9" />
+          <div>
+            <p className="text-xs font-medium tracking-[0.16em] text-sidebar-foreground/60 uppercase">Procurement</p>
+            <p className="text-lg leading-tight font-semibold tracking-tight">SupplierLens</p>
+          </div>
+        </Link>
         <div className="px-3">
           <NavLinks onDark />
         </div>
       </aside>
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex items-center justify-between gap-3 border-b border-border bg-card px-4 py-3 md:hidden">
-          <p className="text-base font-semibold tracking-tight">SupplierLens</p>
+          <Link href="/dashboard" className="flex items-center gap-2">
+            <Logo className="size-7" />
+            <span className="text-base font-semibold tracking-tight">SupplierLens</span>
+          </Link>
         </header>
         <div className="border-b border-border bg-card px-3 py-2 md:hidden">
           <NavLinks onDark={false} />
