@@ -28,7 +28,8 @@ The user will say **"I am Harshal"** or **"I am Pranam"**. Then, without further
    anything the other dev must know (API changes, new env vars, new deps).
 5. Merge rules:
    - The PR only touches your own paths **and** checks are green (local + CI) → you may merge it yourself:
-     `gh pr merge --squash --delete-branch`.
+     `gh pr merge --squash --delete-branch`. If your tool permissions block the merge, don't work around it: give your
+     human that exact command to run (`! gh pr merge <n> --squash --delete-branch`).
    - The PR touches shared files, the other dev's paths, or changes an API shape → **don't merge**. Ask your human to get
      the other dev's approval.
 6. After merging: `git switch main && git pull --rebase`, tick the task in your task file (in the next PR or a `docs:` PR).
