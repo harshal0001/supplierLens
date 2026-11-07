@@ -204,3 +204,16 @@ def test_uploaded_document_not_missing_before_analysis(client):
     client.post(f"/api/suppliers/{sid}/documents",
                 files=[("files", ("annual_financial_report.pdf", PDF, "application/pdf"))])
     assert "financial_report" not in client.get(f"/api/suppliers/{sid}").json()["missing_documents"]
+
+
+@pytest.mark.parametrize("q,lang", [
+    ("Which supplier has the highest risk?", "English"),
+    ("What should we do about Alpha Präzisionsteile GmbH?", "English"),
+    ("Was Beta late last quarter?", "English"),
+    ("Welche Dokumente fehlen bei Delta?", "German"),
+    ("Warum ist Alpha ein Hochrisiko-Lieferant?", "German"),
+    ("Welcher Lieferant hat das höchste Risiko?", "German"),
+])
+def test_answer_language(q, lang):
+    from app.services.assistant import answer_language
+    assert answer_language(q) == lang

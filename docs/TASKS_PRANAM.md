@@ -55,12 +55,12 @@ frontend/
   Then `scripts/seed_demo.py --api http://localhost:8000`: creates the suppliers (`is_synthetic: true`) via the API, uploads PDFs, triggers analyze,
   waits. Re-runnable (skips existing names).
 
-- [ ] **P6. Voice backend** `backend/app/api/voice.py` (`router = APIRouter(prefix="/api/voice")`): `POST /transcribe` (multipart `audio`, ≤ 10 MB,
+- [x] **P6. Voice backend** `backend/app/api/voice.py` (`router = APIRouter(prefix="/api/voice")`): `POST /transcribe` (multipart `audio`, ≤ 10 MB,
   mime whitelist) → ElevenLabs Speech-to-Text → `{text}`; `POST /speak` (`{text}` ≤ 2000) → ElevenLabs Text-to-Speech → `StreamingResponse(audio/mpeg)`.
   Use `httpx`, key/voice/models from `app.config.settings` (`elevenlabs_api_key`, `elevenlabs_voice_id`, `elevenlabs_tts_model`, `elevenlabs_stt_model` already exist). Rate-limit with `from app.api.assistant import rate_limit` (`dependencies=[Depends(rate_limit)]`). Raise `app.errors.ProviderError(msg)` for provider failures. Router is auto-registered. Provider error → 502
   `{"error":{"code":"provider_error",...}}`. **Look up current endpoint paths and model IDs in the ElevenLabs docs.** Tell Harshal to register the router.
 
-- [ ] **P7. Assistant page** `/assistant`: chat (messages, citation chips under each answer; click chip → popover with excerpt + page/URL link),
+- [x] **P7. Assistant page** `/assistant`: chat (messages, citation chips under each answer; click chip → popover with excerpt + page/URL link),
   text input always available, optional supplier picker (preselected from `?supplier_id`), suggested question chips (from CONCEPT §3.5).
   Sends `history` (last 6 turns). `proposed_actions` render as cards with Approve/Reject.
   **Push-to-talk** (`components/voice/PushToTalk.tsx`): click to start/stop (max 60 s, timer + pulsing mic), MediaRecorder (`audio/webm;codecs=opus`,

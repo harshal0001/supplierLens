@@ -783,5 +783,12 @@ export function mockApi<T>(path: string, init?: RequestInit): T {
     return answer as T;
   }
 
+  if (method === "POST" && url === "/api/voice/transcribe") {
+    return { text: "Which supplier has the highest risk, and why?" } as T;
+  }
+  if (method === "POST" && url === "/api/voice/speak") {
+    fail(503, "provider_error", "Voice playback needs the real backend (NEXT_PUBLIC_API_MOCK=0).");
+  }
+
   fail(404, "not_found", `No mock for ${method} ${url}`);
 }

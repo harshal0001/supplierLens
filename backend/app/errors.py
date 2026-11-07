@@ -37,7 +37,7 @@ def install(app: FastAPI) -> None:
 
     @app.exception_handler(RequestValidationError)
     async def _val(_: Request, e: RequestValidationError):
-        msg = "; ".join(f"{'.'.join(str(p) for p in err['loc'][1:])}: {err['msg']}" for err in e.errors())
+        msg = "; ".join(f"{'.'.join(str(p) for p in err['loc'][1:])}: {err['msg'].removeprefix('Value error, ')}" for err in e.errors())
         return _resp(422, "validation_error", msg or "invalid request")
 
     @app.exception_handler(Exception)

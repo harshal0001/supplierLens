@@ -50,7 +50,7 @@ const STEP_LABEL: Record<AnalysisStep["name"], string> = {
 
 const BASIS_LABEL: Record<RiskIndicator["basis"], string> = {
   document_fact: "From document",
-  external_signal: "Web signal · unverified",
+  external_signal: "Web signal",
   ai_interpretation: "AI interpretation",
   reference_data: "Reference data",
 };
@@ -166,7 +166,7 @@ export function SupplierDetailView({ supplierId }: { supplierId: number }) {
           }
         })
         .catch((cause: unknown) => {
-          if (!cancelled) toast.error(asApiFailure(cause).message);
+          if (!cancelled) toast.error(asApiFailure(cause).message, { id: "run-poll" }); // one toast, not one per poll
         });
     }, 2000);
     return () => {
@@ -442,7 +442,11 @@ export function SupplierDetailView({ supplierId }: { supplierId: number }) {
                           <p className="font-medium">{indicator.label}</p>
                           {indicator.value ? <p className="text-sm text-muted-foreground">{indicator.value}</p> : null}
                         </div>
-                        <Badge variant="outline">{BASIS_LABEL[indicator.basis]}</Badge>
+                        <Badge variant="outline">
+                          {BASIS_LABEL[indicator.basis]}
+                          {/* confirmed signals score with confidence 0.75 (risk_engine CONF), unverified with 0.5 */}
+                          {indicator.basis === "external_signal" ? (indicator.confidence >= 0.75 ? " · confirmed" : " · unverified") : null}
+                        </Badge>
                       </div>
                       <div className="mt-2 h-1.5 rounded-full bg-muted" aria-hidden>
                         <div className="h-full rounded-full bg-primary" style={{ width: `${indicator.severity}%` }} />
