@@ -5,18 +5,16 @@ These rules are binding for every coding agent in this repo. If anything here co
 ## 1. Startup routine (do this every session, in order)
 The user will say **"I am Harshal"** or **"I am Pranam"**. Then, without further questions:
 1. `git switch main && git pull --rebase`. If the working tree is dirty, stop and show `git status` to the human.
-2. Read `docs/CONTRACT.md` fully, then your task file: Harshal → `docs/TASKS_HARSHAL.md`, Pranam → `docs/TASKS_PRANAM.md`.
+2. Read `docs/CONTRACT.md` fully (API shapes, data model, scoring rules).
 3. Check open PRs (`gh pr list`). Don't start a task that already has an open PR.
-4. Start at the first unticked `[ ]` task in **your** file. One task at a time, following §3.
-5. When your list is done, tell your human and ask whether to take over a task from the other person. Never take one silently.
+4. Ask your human which task to work on. One task at a time, following §3.
 
 ## 2. Ownership (who may edit what) — see CONTRACT §2 for the full table
 | Harshal | Pranam | Shared (both humans must agree) |
 |---|---|---|
-| `backend/**` except `backend/app/api/voice.py` | `frontend/**`, `demo-data/**`, `scripts/**`, `backend/app/api/voice.py`, `docs/DEMO_SCRIPT.md` | `docs/CONTRACT.md`, `CLAUDE.md`, `.env.example`, `.github/**` |
+| `backend/**` except `backend/app/api/voice.py` | `frontend/**`, `demo-data/**`, `scripts/**`, `backend/app/api/voice.py` | `docs/CONTRACT.md`, `CLAUDE.md`, `.env.example`, `.github/**` |
 
 - Touch only your own paths. If a task needs a change elsewhere, **stop and tell your human exactly what's needed** (file, change, why).
-- Ticking your own checkbox in your own task file is always allowed.
 - The API shapes in CONTRACT §4 are exact. Never "work around" a mismatch: report it.
 
 ## 3. Git workflow (branch → PR → checks → merge)
@@ -65,7 +63,7 @@ CI (`.github/workflows/ci.yml`, once merged) runs the same checks on every PR.
 - The frontend never gets API keys. All provider calls (Anthropic, Exa, ElevenLabs) go through the backend.
 - Never commit real supplier documents, `backend/data/`, `.venv`, `node_modules`, or `.next`.
 
-## 6. Product guardrails (from CONCEPT §15)
+## 6. Product guardrails
 - Risk scores come from deterministic code only (`backend/app/services/risk_engine.py`). The LLM extracts quoted facts,
   classifies into fixed enums, and writes summaries labelled "AI-generated".
 - Never fabricate supplier facts. Every claim carries evidence (quote + page, or URL + date). Missing data ≠ low risk:

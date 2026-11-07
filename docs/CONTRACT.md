@@ -2,7 +2,7 @@
 
 **Both agents read this in full before coding.** It's the fixed agreement that lets Harshal (backend + AI) and
 Pranam (frontend + voice + demo) build in parallel. If you need to change it, ask your human. They agree it with the
-other dev and edit this file. Product context: `docs/CONCEPT.md` (§3, §12 demo workflow, §15 guardrails).
+other dev and edit this file.
 
 **Goal:** one convincing, working demo of
 **Upload supplier PDF → extract facts → search web signals → explainable risk score with evidence → ask by voice → spoken, cited answer → action plan.**
@@ -34,7 +34,7 @@ Anything else is out of scope.
 |---|---|
 | `backend/**` except `backend/app/api/voice.py` | **Harshal** |
 | `backend/app/api/voice.py` | **Pranam** (Harshal adds the one `include_router` line in `main.py`) |
-| `frontend/**`, `demo-data/**`, `scripts/**`, `docs/DEMO_SCRIPT.md`, pitch deck | **Pranam** |
+| `frontend/**`, `demo-data/**`, `scripts/**`, pitch deck | **Pranam** |
 | `docs/CONTRACT.md`, `CLAUDE.md`, `.env.example` | both (humans agree first) |
 
 Python deps for `scripts/` and `voice.py` go in `backend/pyproject.toml`. Pranam's agent tells Harshal which dep to add, or adds only that line.
