@@ -1,4 +1,4 @@
-"""Grounded procurement assistant: Claude tool-use loop over read-only supplier data (CONTRACT §6)."""
+"""Grounded procurement assistant: Claude tool-use loop over read-only supplier data."""
 
 import difflib
 import json
@@ -192,7 +192,7 @@ class _Turn:
             self.db.rollback()
             log.exception("tool %s failed", name)
             result = {"error": f"{name} failed temporarily, answer without it"}
-        # Tool output carries document/web text: fence it as untrusted data (CONTRACT §7).
+        # Tool output carries document/web text: fence it as untrusted data.
         body = llm.fence(json.dumps(result, default=str, ensure_ascii=False)[:MAX_TOOL_CHARS])
         return f"<untrusted_document>\n{body}\n</untrusted_document>"
 

@@ -1,4 +1,4 @@
-// Copied verbatim from docs/CONTRACT.md §4.
+// Must match backend/app/schemas.py exactly.
 
 export type Classification = "low" | "medium" | "high" | "insufficient_data";
 export type Category = "financial" | "operational" | "delivery" | "compliance" | "external";

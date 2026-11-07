@@ -39,7 +39,7 @@ app.include_router(suppliers.router)
 app.include_router(analysis.router)
 app.include_router(assistant.router)
 
-if importlib.util.find_spec("app.api.voice"):  # Pranam's voice router (CONTRACT §2), registered once it exists
+if importlib.util.find_spec("app.api.voice"):  # voice router, registered when present
     from app.api import voice
 
     app.include_router(voice.router)

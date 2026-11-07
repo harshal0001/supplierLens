@@ -120,7 +120,7 @@ overall    = weighted mean over assessed categories
 class      = insufficient data if coverage < 50 %, else low ≤ 30 < medium ≤ 60 < high
 ```
 
-A confirmed critical finding (e.g. an insolvency) is never averaged away, and an AI interpretation on its own never makes a category look assessed. Thresholds and weights are starting hypotheses, defined in one place: `backend/app/services/risk_engine.py`. Full rules: [`docs/CONTRACT.md`](docs/CONTRACT.md) §5.
+A confirmed critical finding (e.g. an insolvency) is never averaged away, and an AI interpretation on its own never makes a category look assessed. Thresholds and weights are starting hypotheses, defined in one place: `backend/app/services/risk_engine.py`.
 
 ### Trust guardrails
 
@@ -162,7 +162,6 @@ frontend/
   lib/              API client, types, optional mock data
 scripts/            demo PDF generator, demo seeding, browser end-to-end run
 demo-data/          synthetic supplier PDFs
-docs/               concept, API contract, demo script, pitch
 ```
 
 ---
@@ -227,7 +226,7 @@ cd frontend && pnpm lint && pnpm typecheck && pnpm build    # frontend checks
 | POST | `/api/assistant/query` | ask a question |
 | POST | `/api/voice/transcribe`, `/api/voice/speak` | speech-to-text, text-to-speech |
 
-Exact request and response shapes: [`docs/CONTRACT.md`](docs/CONTRACT.md) §4.
+Exact request and response shapes: `backend/app/schemas.py` (mirrored in `frontend/lib/types.ts`).
 
 ---
 
@@ -241,8 +240,3 @@ Deliberate shortcuts for the prototype, each marked `shortcut:` in the code:
 - PDF only, no OCR for scanned documents.
 
 **Next:** customer interviews with procurement managers to validate the problem and pricing, pilots with 3–5 manufacturers, then authentication, Postgres with a job queue, Excel/Word import, and continuous monitoring.
-
-## Documentation
-
-- [`docs/CONTRACT.md`](docs/CONTRACT.md): API contract, data model, scoring rules
-- [`CLAUDE.md`](CLAUDE.md): engineering rules for contributors and coding agents
