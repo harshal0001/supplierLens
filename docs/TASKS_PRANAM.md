@@ -45,8 +45,8 @@ frontend/
   - **Action plan:** list with priority, rationale, Approve / Reject / Done.
   - "Ask the assistant about this supplier" button → `/assistant?supplier_id=…`.
 
-- [ ] **P5. Demo data** (do this while waiting on the API, ≈ T+2:00): `scripts/make_demo_docs.py` (run with `uv run --project backend python scripts/make_demo_docs.py`)
-  uses PyMuPDF to write PDFs to `demo-data/`. Every page has the footer "SYNTHETIC DEMO DATA, NOT A REAL COMPANY". 4 fictional suppliers, e.g.
+- [ ] **P5. Demo data** (do this while waiting on the API, ≈ T+2:00): `scripts/make_demo_docs.py` (run with `uv run --with fpdf2 python scripts/make_demo_docs.py`.
+  PDF libs aren't backend deps: the backend uses pypdf for reading) uses fpdf2 to write PDFs to `demo-data/`. Every page has the footer "SYNTHETIC DEMO DATA, NOT A REAL COMPANY". 4 fictional suppliers, e.g.
   - "Alpha Präzisionsteile GmbH": **high**: net loss, revenue −25%, equity ratio 8%, on-time 78%, ISO 9001 expired 2 months ago, criticality high.
   - "Beta Kunststofftechnik GmbH": **medium**: revenue −10%, current ratio 1.2, on-time 91%, ISO 9001 expiring in 30 days.
   - "Gamma Elektronik AG": **low**: healthy financials, on-time 98%, 120 ppm, valid ISO 9001 + IATF 16949.
@@ -57,7 +57,7 @@ frontend/
 
 - [ ] **P6. Voice backend** `backend/app/api/voice.py` (`router = APIRouter(prefix="/api/voice")`): `POST /transcribe` (multipart `audio`, ≤ 10 MB,
   mime whitelist) → ElevenLabs Speech-to-Text → `{text}`; `POST /speak` (`{text}` ≤ 2000) → ElevenLabs Text-to-Speech → `StreamingResponse(audio/mpeg)`.
-  Use `httpx`, key/voice/models from settings (`ELEVENLABS_*` in `app/config.py`, ask Harshal to add the fields if they're missing). Provider error → 502
+  Use `httpx`, key/voice/models from `app.config.settings` (`elevenlabs_api_key`, `elevenlabs_voice_id`, `elevenlabs_tts_model`, `elevenlabs_stt_model` already exist). Rate-limit with `from app.api.assistant import rate_limit` (`dependencies=[Depends(rate_limit)]`). Raise `app.errors.ProviderError(msg)` for provider failures. Router is auto-registered. Provider error → 502
   `{"error":{"code":"provider_error",...}}`. **Look up current endpoint paths and model IDs in the ElevenLabs docs.** Tell Harshal to register the router.
 
 - [ ] **P7. Assistant page** `/assistant`: chat (messages, citation chips under each answer; click chip → popover with excerpt + page/URL link),

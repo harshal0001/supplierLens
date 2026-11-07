@@ -1,0 +1,23 @@
+[project]
+name = "supplierlens-backend"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "anthropic>=2.6.0",
+    "exa-py>=2.28.0",
+    "fastapi>=0.162.0",
+    "httpx>=0.28.1",
+    "pydantic-settings>=2.16.2",
+    "pypdf>=5",
+    "python-multipart>=0.0.33",
+    "sqlalchemy>=2.1.8",
+    "uvicorn>=0.54.0",
+    "watchfiles>=1.3.0",
+]
+
+[dependency-groups]
+dev = ["pytest>=9"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
