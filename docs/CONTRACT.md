@@ -94,7 +94,7 @@ interface ExternalSignal { id: number; title: string; url: string; published_at:
   verification_status: "unverified" | "source_confirmed" | "rejected" }
 interface ActionItem { id: number; supplier_id: number; supplier_name: string; template_key: string; title: string;
   rationale: string; priority: "low" | "medium" | "high"; status: "proposed" | "approved" | "rejected" | "done"; created_at: string }
-interface Dashboard { totals: { suppliers: number; high: number; medium: number; low: number; insufficient_data: number; not_assessed: number };
+interface Dashboard { totals: { suppliers: number; high: number; medium: number; low: number; insufficient_data: number; not_assessed: number; open_actions: number; open_high_priority: number };
   top_risk: SupplierSummary[];                                  // 5 highest overall_score
   certifications: { supplier_id: number; supplier_name: string; standard: string; expires_on: string; days_left: number }[]; // expired or ≤ 90 days
   open_actions: ActionItem[] }                                  // proposed/approved, high priority first, max 8

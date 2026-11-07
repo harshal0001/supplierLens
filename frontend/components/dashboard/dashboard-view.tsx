@@ -81,7 +81,15 @@ export function DashboardView() {
         const open = current.open_actions
           .map((item) => (item.id === updated.id ? updated : item))
           .filter((item) => item.status === "proposed" || item.status === "approved");
-        return { ...current, open_actions: open };
+        const closed = updated.status === "rejected" || updated.status === "done"; // approved stays open
+        const totals = closed
+          ? {
+              ...current.totals,
+              open_actions: current.totals.open_actions - 1,
+              open_high_priority: current.totals.open_high_priority - (updated.priority === "high" ? 1 : 0),
+            }
+          : current.totals;
+        return { ...current, totals, open_actions: open };
       });
       toast.success(status === "approved" ? "Action approved" : "Action rejected");
     } catch (cause) {
@@ -146,7 +154,6 @@ export function DashboardView() {
   }
 
   const expired = data.certifications.filter((certificate) => certificate.days_left < 0).length;
-  const highPriority = data.open_actions.filter((action) => action.priority === "high").length;
 
   return (
     <TooltipProvider>
@@ -182,8 +189,8 @@ export function DashboardView() {
           <KpiTile
             icon={ClipboardList}
             label="Open actions"
-            value={data.open_actions.length}
-            caption={`${highPriority} high priority`}
+            value={data.totals.open_actions}
+            caption={`${data.totals.open_high_priority} high priority`}
             accent="var(--ring)"
             onClick={() => scrollTo("actions")}
             delay={225}
