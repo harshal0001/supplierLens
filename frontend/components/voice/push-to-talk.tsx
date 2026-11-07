@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Mic, Square } from "lucide-react";
+import { Loader2, Mic, Square } from "lucide-react";
 import { toast } from "sonner";
 import { api, asApiFailure } from "@/lib/api";
-import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 const MAX_SECONDS = 60;
 
@@ -16,20 +16,32 @@ function pickMime() {
   return "";
 }
 
+export interface VoiceState {
+  phase: "idle" | "listening" | "transcribing";
+  analyser: AnalyserNode | null; // live microphone level while listening
+  secondsLeft: number;
+}
+
 /** Click to start, click again to stop (auto-stops after 60 s, Esc cancels). Sends the recording for transcription. */
 export function PushToTalk({
   disabled,
   onTranscript,
   onStatus,
+  onVoiceState,
+  className,
 }: {
   disabled?: boolean;
   onTranscript: (text: string) => void;
   onStatus: (status: string) => void;
+  onVoiceState?: (state: VoiceState) => void;
+  className?: string;
 }) {
   const [recording, setRecording] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
   const [seconds, setSeconds] = useState(0);
+  const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
   const recorder = useRef<MediaRecorder | null>(null);
+  const meter = useRef<AudioContext | null>(null); // feeds only the level meter, never the recording
   const cancelled = useRef(false);
   const starting = useRef(false); // a 2nd click during the permission prompt would start a 2nd mic stream
 
@@ -53,13 +65,42 @@ export function PushToTalk({
     if (recording && seconds >= MAX_SECONDS) recorder.current?.stop();
   }, [recording, seconds]);
 
+  useEffect(() => {
+    onVoiceState?.({
+      phase: recording ? "listening" : transcribing ? "transcribing" : "idle",
+      analyser,
+      secondsLeft: MAX_SECONDS - seconds,
+    });
+  }, [onVoiceState, recording, transcribing, analyser, seconds]);
+
   useEffect(
     () => () => {
       cancelled.current = true; // left the page: don't send (or ask) a recording that ends after unmount
       recorder.current?.stream.getTracks().forEach((track) => track.stop());
+      void meter.current?.close();
     },
     [],
   );
+
+  function openMeter(stream: MediaStream) {
+    try {
+      const context = new AudioContext();
+      const node = context.createAnalyser();
+      node.fftSize = 256;
+      node.smoothingTimeConstant = 0.7;
+      context.createMediaStreamSource(stream).connect(node); // not connected to the speakers: no echo
+      meter.current = context;
+      setAnalyser(node);
+    } catch {
+      // the meter is decoration; recording works without it
+    }
+  }
+
+  function closeMeter() {
+    void meter.current?.close();
+    meter.current = null;
+    setAnalyser(null);
+  }
 
   async function start() {
     if (starting.current) return;
@@ -91,6 +132,7 @@ export function PushToTalk({
     };
     rec.onstop = () => {
       stream.getTracks().forEach((track) => track.stop());
+      closeMeter();
       setRecording(false);
       if (cancelled.current || chunks.length === 0) {
         onStatus("");
@@ -102,6 +144,7 @@ export function PushToTalk({
     cancelled.current = false;
     setSeconds(0);
     rec.start();
+    openMeter(stream);
     setRecording(true);
     onStatus("Listening…");
   }
@@ -128,16 +171,27 @@ export function PushToTalk({
   }
 
   return (
-    <Button
+    <button
       type="button"
-      variant={recording ? "destructive" : "outline"}
       disabled={(disabled && !recording) || transcribing}
       aria-pressed={recording}
       aria-label={recording ? "Stop recording" : "Ask by voice"}
       onClick={() => (recording ? recorder.current?.stop() : void start())}
+      className={cn(
+        "relative grid place-items-center rounded-full outline-none transition-all duration-300 focus-visible:ring-4 focus-visible:ring-sky-300/70 disabled:cursor-not-allowed",
+        recording
+          ? "bg-risk-high text-white shadow-[0_0_0_10px_rgb(239_68_68/0.2)] hover:brightness-110"
+          : "bg-white text-primary shadow-[0_12px_40px_-8px_rgb(56_189_248/0.6)] hover:scale-105 disabled:opacity-70 disabled:hover:scale-100",
+        className,
+      )}
     >
-      {recording ? <Square className="size-4" aria-hidden /> : <Mic className="size-4" aria-hidden />}
-      {recording ? `Stop (${MAX_SECONDS - seconds}s)` : transcribing ? "Transcribing…" : "Ask by voice"}
-    </Button>
+      {recording ? (
+        <Square className="size-[34%] fill-current" aria-hidden />
+      ) : transcribing ? (
+        <Loader2 className="size-[40%] animate-spin" aria-hidden />
+      ) : (
+        <Mic className="size-[40%]" aria-hidden />
+      )}
+    </button>
   );
 }
