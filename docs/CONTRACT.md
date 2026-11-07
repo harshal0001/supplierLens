@@ -116,6 +116,7 @@ interface AssistantAnswer { answer: string;     // plain text, ≤ ~120 words, c
 | POST `/api/suppliers/{id}/analyze` | – | `AnalysisRun` 202 (returns the active run if one is already running) |
 | GET `/api/runs/{id}` | – | `AnalysisRun` (frontend polls every 2 s) |
 | GET `/api/suppliers/{id}/risk` | – | `RiskAssessment` (404 if never analysed) |
+| GET `/api/suppliers/{id}/risk/history` | – | `RiskHistoryPoint[]` = `{id, overall_score, classification, confidence, coverage, created_at}[]`, oldest first (`[]` if never analysed) |
 | GET `/api/suppliers/{id}/signals` | – | `ExternalSignal[]` |
 | GET `/api/suppliers/{id}/actions` | – | `ActionItem[]` |
 | PATCH `/api/actions/{id}` | `{status: "approved" \| "rejected" \| "done"}` | `ActionItem` |

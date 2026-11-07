@@ -138,6 +138,15 @@ class RiskAssessment(BaseModel):
     created_at: UtcDatetime
 
 
+class RiskHistoryPoint(ORM):
+    id: int
+    overall_score: float | None
+    classification: Classification
+    confidence: float
+    coverage: float
+    created_at: UtcDatetime
+
+
 class ExternalSignalOut(BaseModel):
     id: int
     title: str
