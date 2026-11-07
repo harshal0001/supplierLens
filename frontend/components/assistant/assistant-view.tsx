@@ -247,10 +247,10 @@ export function AssistantView({ initialSupplierId }: { initialSupplierId: number
       </header>
 
       <div className="grid gap-5 lg:grid-cols-[340px_minmax(0,1fr)] lg:items-start">
-        {/* Voice stage: sticky bar on phones, tall panel on desktop */}
+        {/* Voice stage: sticky bar on phones; on desktop as tall as the chat card's 560px minimum, so both columns line up */}
         <section
           aria-label="Voice"
-          className="sticky top-0 z-10 overflow-hidden rounded-2xl bg-primary text-primary-foreground shadow-xl shadow-primary/20 lg:top-6"
+          className="sticky top-0 z-10 overflow-hidden rounded-2xl bg-primary text-primary-foreground shadow-xl shadow-primary/20 lg:top-6 lg:flex lg:min-h-[560px] lg:flex-col"
         >
           <div
             aria-hidden
@@ -260,7 +260,7 @@ export function AssistantView({ initialSupplierId }: { initialSupplierId: number
               stage === "listening" && "bg-[radial-gradient(ellipse_at_50%_0%,rgb(239_68_68/0.3),transparent_65%)]",
             )}
           />
-          <div className="relative flex items-center gap-4 p-4 lg:flex-col lg:gap-5 lg:p-7">
+          <div className="relative flex items-center gap-4 p-4 lg:flex-1 lg:flex-col lg:justify-between lg:gap-5 lg:p-7">
             <div className="hidden w-full items-center justify-between text-xs lg:flex">
               <span className="inline-flex items-center gap-2 font-medium tracking-[0.14em] text-primary-foreground/70 uppercase">
                 <span
