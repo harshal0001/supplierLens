@@ -12,3 +12,4 @@ __pycache__/
 .DS_Store
 demo-data/out/
 backend/data*/
+.claude/worktrees/
