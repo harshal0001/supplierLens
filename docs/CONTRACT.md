@@ -171,10 +171,11 @@ Confidence by basis: document_fact 0.9 · ai_interpretation 0.4 · reference_dat
 ### 5.3 Formula
 ```
 weights: financial .25, operational .25, delivery .20, compliance .15, external .15
-per category with ≥1 indicator:
+per category with ≥1 indicator whose basis ≠ ai_interpretation (AI indicators then still count in score and conf):
     score = max( Σ(sev·conf)/Σconf ,  max sev among indicators with conf ≥ 0.75 )   # confirmed critical finding isn't averaged away
     conf  = 1 − Π(1 − conf_i)
-category with no indicators → score null ("Not assessed"), NEVER treated as low risk
+category with no indicators, or only ai_interpretation ones → score null ("Not assessed"), conf 0, not in coverage;
+    indicator_count still counts them. NEVER treated as low risk
 coverage   = Σ weights of assessed categories
 overall    = Σ(w·score)/coverage   (null if coverage = 0), rounded to 1 decimal
 confidence = Σ w·conf over assessed categories
