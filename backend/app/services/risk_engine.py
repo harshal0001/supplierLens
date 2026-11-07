@@ -232,8 +232,9 @@ def score(indicators: list[IndicatorDraft]) -> AssessmentDraft:
     categories: dict[str, dict] = {}
     for cat, w in WEIGHTS.items():
         items = [i for i in indicators if i.category == cat]
-        if not items:
-            categories[cat] = {"score": None, "confidence": 0.0, "weight": w, "indicator_count": 0}
+        # AI interpretation alone is not verified evidence: such a category stays "Not assessed"
+        if all(i.basis == "ai_interpretation" for i in items):
+            categories[cat] = {"score": None, "confidence": 0.0, "weight": w, "indicator_count": len(items)}
             continue
         total_conf = sum(i.confidence for i in items)
         mean = sum(i.severity * i.confidence for i in items) / total_conf
