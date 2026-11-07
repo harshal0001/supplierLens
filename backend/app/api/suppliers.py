@@ -35,12 +35,12 @@ def create_supplier(body: s.SupplierInput, db: Session = Depends(get_db)):
 
 
 @router.get("/suppliers/{supplier_id}", response_model=s.SupplierDetail)
-def get_supplier(supplier_id: int, db: Session = Depends(get_db)):
+def get_supplier(supplier_id: s.DbId, db: Session = Depends(get_db)):
     return queries.supplier_detail(db, queries.supplier_or_404(db, supplier_id))
 
 
 @router.post("/suppliers/{supplier_id}/documents", response_model=list[s.SupplierDocument], status_code=201)
-def upload_documents(supplier_id: int, files: list[UploadFile] = File(...), db: Session = Depends(get_db)):
+def upload_documents(supplier_id: s.DbId, files: list[UploadFile] = File(...), db: Session = Depends(get_db)):
     queries.supplier_or_404(db, supplier_id)
     if not 1 <= len(files) <= MAX_FILES:
         raise AppError(400, f"Upload between 1 and {MAX_FILES} files")
@@ -73,7 +73,7 @@ def upload_documents(supplier_id: int, files: list[UploadFile] = File(...), db: 
 
 
 @router.get("/documents/{document_id}/file")
-def document_file(document_id: int, db: Session = Depends(get_db)):
+def document_file(document_id: s.DbId, db: Session = Depends(get_db)):
     doc = db.get(Document, document_id)
     if doc is None:
         raise AppError(404, "Document not found")
