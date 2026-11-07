@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Check, Circle, LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
 import { api, asApiFailure } from "@/lib/api";
+import { formatWhen } from "@/lib/format";
 import type {
   ActionItem,
   AnalysisRun,
@@ -253,7 +254,7 @@ export function SupplierDetailView({ supplierId }: { supplierId: number }) {
     return <Skeleton className="h-80" />;
   }
 
-  const assessed = risk ? CATEGORIES.filter((category) => risk.categories[category].score != null).length : 0;
+  const assessed = risk ? CATEGORIES.filter((category) => risk.categories[category]?.score != null).length : 0;
   const webFailed = run?.steps.some((step) => step.name === "external_research" && step.status === "failed") ?? false;
 
   return (
@@ -380,10 +381,12 @@ export function SupplierDetailView({ supplierId }: { supplierId: number }) {
                   <span>
                     {STEP_LABEL[step.name]}
                     <span className="sr-only"> {step.status}</span>
+                    {step.error ? <span className="mt-0.5 block text-xs text-red-700">{step.error}</span> : null}
                   </span>
                 </li>
               ))}
             </ol>
+            {run.status === "failed" && run.error ? <p className="text-sm text-red-700">{run.error}</p> : null}
             {webFailed ? (
               <p className="text-sm text-slate-600">Web research unavailable, score based on documents only.</p>
             ) : null}
@@ -474,7 +477,7 @@ export function SupplierDetailView({ supplierId }: { supplierId: number }) {
                                     {domainOf(item.url)}
                                   </a>
                                 ) : null}
-                                {item.source_date ? ` · ${item.source_date}` : null}
+                                {item.source_date ? ` · ${formatWhen(item.source_date)}` : null}
                               </p>
                             </li>
                           ))}
@@ -504,7 +507,7 @@ export function SupplierDetailView({ supplierId }: { supplierId: number }) {
                   </CardTitle>
                   <CardDescription>
                     {domainOf(signal.url)}
-                    {signal.published_at ? ` · ${signal.published_at}` : ""}
+                    {signal.published_at ? ` · ${formatWhen(signal.published_at)}` : ""}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-2">

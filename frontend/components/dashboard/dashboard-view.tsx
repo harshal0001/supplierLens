@@ -7,6 +7,7 @@ import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import { toast } from "sonner";
 import { Plus } from "lucide-react";
 import { api, asApiFailure } from "@/lib/api";
+import { formatWhen } from "@/lib/format";
 import type { ActionItem, Dashboard } from "@/lib/types";
 import { RiskBadge } from "@/components/risk/risk-badge";
 import { Button } from "@/components/ui/button";
@@ -230,7 +231,7 @@ export function DashboardView() {
                           {certificate.supplier_name}
                         </Link>
                         <p className="text-sm text-muted-foreground">
-                          {certificate.standard} · {certificate.expires_on}
+                          {certificate.standard} · {formatWhen(certificate.expires_on)}
                         </p>
                       </div>
                       <p className={expired ? "text-sm font-medium text-red-700" : "text-sm text-amber-800"}>
