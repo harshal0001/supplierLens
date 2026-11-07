@@ -26,7 +26,7 @@ frontend/
   one full `RiskAssessment` (one category not assessed), signals, actions, dashboard, an `AssistantAnswer` with 2 citations, and a run whose steps
   advance on each poll. Sidebar layout.
 
-- [ ] **P2. Dashboard** `/dashboard`: KPI cards (total, high, medium, low, not assessed), risk distribution donut (Recharts), top-5 risk table
+- [x] **P2. Dashboard** `/dashboard`: KPI cards (total, high, medium, low, not assessed), risk distribution donut (Recharts), top-5 risk table
   (click → supplier), expiring/expired certifications (red if expired), open actions with Approve/Reject buttons (PATCH). Empty state with "Add supplier".
 
 - [ ] **P3. Suppliers** `/suppliers`: table (name + synthetic badge, country, category, criticality, risk badge + score, confidence bar, docs,
