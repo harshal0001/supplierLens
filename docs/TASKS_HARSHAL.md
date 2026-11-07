@@ -71,7 +71,7 @@ backend/
 
 - [x] **H10. Voice router**: `main.py` auto-registers `app/api/voice.py` (`router`) as soon as Pranam pushes it. No action needed.
 
-- [ ] **H11. (T+5:00–6:00) Hardening for demo**: full demo flow 3× from an empty DB, fix whatever breaks. Write `backend/README.md`
+- [x] **H11. (T+5:00–6:00) Hardening for demo**: full demo flow 3× from an empty DB, fix whatever breaks. Write `backend/README.md`
   (run commands, env vars). Optional only if the hackathon requires a URL: deploy backend to Railway (Dockerfile or Nixpacks, volume on `data/`).
 
 **Skip:** auth, multi-tenancy, migrations, Celery/Redis, embeddings, Word/Excel parsing, alerts, history UI, compare endpoint.

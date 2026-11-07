@@ -217,3 +217,29 @@ def test_uploaded_document_not_missing_before_analysis(client):
 def test_answer_language(q, lang):
     from app.services.assistant import answer_language
     assert answer_language(q) == lang
+
+
+# e2e finding — an open proposed action is refreshed to the latest assessment, an approved one is left alone
+def test_proposed_actions_refreshed_on_reanalysis(client, no_research, monkeypatch):
+    from app.facts import Delivery, Financials, NumFact
+    extractions = iter([
+        DocumentExtraction(doc_type="delivery_report", delivery=Delivery(on_time_delivery_pct=NumFact(
+            value=90, quote="On-time delivery rate: 78.0 %", page=1))),
+        DocumentExtraction(doc_type="financial_report", financials=Financials(net_income=NumFact(
+            value=-500000, quote="Net income: -500000 EUR", page=1))),
+    ])
+    monkeypatch.setattr(llm, "structured", lambda *a, **k: next(extractions))
+    sid = make_supplier(client)
+    client.post(f"/api/suppliers/{sid}/documents", files=[("files", ("otd.pdf", PDF, "application/pdf"))])
+    run_analysis(client, sid)
+    first = {a["template_key"]: a for a in client.get(f"/api/suppliers/{sid}/actions").json()}
+    client.patch(f"/api/actions/{first['request_financials']['id']}", json={"status": "approved"})
+    fin = make_pdf([["Annual report", "Net income: -500000 EUR"]])
+    client.post(f"/api/suppliers/{sid}/documents", files=[("files", ("financials.pdf", fin, "application/pdf"))])
+    run_analysis(client, sid)
+    after = client.get(f"/api/suppliers/{sid}/actions").json()
+    by_key = {a["template_key"]: a for a in after}
+    assert len(after) == len(by_key)  # still one action per key
+    assert by_key["request_financials"]["status"] == "approved"  # user decision untouched
+    old, new = first["schedule_reassessment"], by_key["schedule_reassessment"]
+    assert new["id"] == old["id"] and new["rationale"] != old["rationale"]  # same action, refreshed to the new score
