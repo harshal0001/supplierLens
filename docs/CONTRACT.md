@@ -15,7 +15,7 @@ Anything else is out of scope.
 | Area | Decision |
 |---|---|
 | Repo | `backend/`, `frontend/`, `demo-data/`, `scripts/`, `docs/` |
-| Backend | Python 3.12, `uv`, FastAPI, Pydantic v2, SQLAlchemy 2 (sync), **SQLite** file `backend/data/app.db` (`Base.metadata.create_all` on startup, no migrations), `pymupdf`, `anthropic`, `exa-py`, `httpx` |
+| Backend | Python 3.12, `uv`, FastAPI, Pydantic v2, SQLAlchemy 2 (sync), **SQLite** file `backend/data/app.db` (`Base.metadata.create_all` on startup, no migrations), `pypdf`, `anthropic`, `exa-py`, `httpx` |
 | Frontend | Next.js 16 App Router, TypeScript, Tailwind 4, shadcn/ui, Recharts, lucide-react, pnpm. Client components + plain `fetch`, no data libraries |
 | LLM | Anthropic Claude. `LLM_MODEL=claude-sonnet-5-5` (extraction, assistant, summary), `LLM_MODEL_FAST=claude-haiku-5-5` (signal classification) |
 | Web research | Exa |
@@ -195,7 +195,7 @@ Missing documents (shown, not scored): no `certification`, no `financial_report`
 `rationale` = the labels of the triggering indicators.
 
 ### 5.5 Analysis run steps
-1 `process_documents` (PyMuPDF text per page → chunks → LLM extraction; one bad doc = that doc failed, continue) →
+1 `process_documents` (pypdf text per page → chunks → LLM extraction; one bad doc = that doc failed, continue) →
 2 `external_research` (Exa; failure = step failed, run continues) → 3 `score` → 4 `recommend` (actions + 2–3 sentence AI summary; summary failure = null).
 Run succeeds if step 3 succeeds.
 
