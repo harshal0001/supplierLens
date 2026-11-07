@@ -45,7 +45,7 @@ frontend/
   - **Action plan:** list with priority, rationale, Approve / Reject / Done.
   - "Ask the assistant about this supplier" button → `/assistant?supplier_id=…`.
 
-- [ ] **P5. Demo data** (do this while waiting on the API, ≈ T+2:00): `scripts/make_demo_docs.py` (run with `uv run --with fpdf2 python scripts/make_demo_docs.py`.
+- [x] **P5. Demo data** (do this while waiting on the API, ≈ T+2:00): `scripts/make_demo_docs.py` (run with `uv run --with fpdf2 python scripts/make_demo_docs.py`.
   PDF libs aren't backend deps: the backend uses pypdf for reading) uses fpdf2 to write PDFs to `demo-data/`. Every page has the footer "SYNTHETIC DEMO DATA, NOT A REAL COMPANY". 4 fictional suppliers, e.g.
   - "Alpha Präzisionsteile GmbH": **high**: net loss, revenue −25%, equity ratio 8%, on-time 78%, ISO 9001 expired 2 months ago, criticality high.
   - "Beta Kunststofftechnik GmbH": **medium**: revenue −10%, current ratio 1.2, on-time 91%, ISO 9001 expiring in 30 days.
