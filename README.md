@@ -244,7 +244,5 @@ Deliberate shortcuts for the prototype, each marked `shortcut:` in the code:
 
 ## Documentation
 
-- [`docs/CONCEPT.md`](docs/CONCEPT.md): product concept, market and business model
 - [`docs/CONTRACT.md`](docs/CONTRACT.md): API contract, data model, scoring rules
-- [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) and [`docs/PITCH.md`](docs/PITCH.md): demo and pitch
 - [`CLAUDE.md`](CLAUDE.md): engineering rules for contributors and coding agents

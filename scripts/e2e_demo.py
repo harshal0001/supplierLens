@@ -1,4 +1,4 @@
-"""Browser end-to-end run of the demo flow (CONCEPT §12) against a running backend + frontend with an EMPTY database.
+"""Browser end-to-end run of the demo flow against a running backend + frontend with an EMPTY database.
 
 Also records a silent backup video of the demo (Playwright). Not a backend dependency; run with:
 
