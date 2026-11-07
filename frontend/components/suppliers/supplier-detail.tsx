@@ -189,9 +189,16 @@ export function SupplierDetailView({ supplierId }: { supplierId: number }) {
     }
   }
 
+  const runActive = run?.status === "queued" || run?.status === "running";
+
   function takeFiles(list: FileList | File[]) {
     const files = Array.from(list);
     if (files.length === 0) return;
+    if (uploading || runActive) {
+      // The running analysis already picked its documents; a file added now would stay "uploaded" unanalysed.
+      toast.error("Wait for the current upload and analysis to finish.");
+      return;
+    }
     if (files.length > 10) {
       toast.error("Upload up to 10 PDFs at a time.");
       return;
@@ -304,7 +311,7 @@ export function SupplierDetailView({ supplierId }: { supplierId: number }) {
         <CardContent className="space-y-4">
           <label
             className={cn(
-              "block cursor-pointer rounded-lg border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-600 transition-colors",
+              "block cursor-pointer rounded-lg border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-600 transition-colors focus-within:ring-3 focus-within:ring-ring/50",
               dragOver && "border-sky-700 bg-sky-50",
             )}
             onDragOver={(event) => {
@@ -323,7 +330,7 @@ export function SupplierDetailView({ supplierId }: { supplierId: number }) {
               accept="application/pdf,.pdf"
               multiple
               className="sr-only"
-              disabled={uploading}
+              disabled={uploading || runActive}
               onChange={(event) => {
                 if (event.target.files) takeFiles(event.target.files);
                 event.target.value = "";

@@ -10,6 +10,7 @@ import { api, asApiFailure } from "@/lib/api";
 import { formatWhen } from "@/lib/format";
 import type { ActionItem, Dashboard } from "@/lib/types";
 import { RiskBadge } from "@/components/risk/risk-badge";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -195,6 +196,11 @@ export function DashboardView() {
                       <Link href={`/suppliers/${supplier.id}`} className="cursor-pointer hover:underline">
                         {supplier.name}
                       </Link>
+                      {supplier.is_synthetic ? (
+                        <Badge variant="outline" className="ml-2 border-dashed">
+                          Synthetic demo data
+                        </Badge>
+                      ) : null}
                     </TableCell>
                     <TableCell>
                       <RiskBadge classification={supplier.classification} />

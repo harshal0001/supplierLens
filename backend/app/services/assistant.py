@@ -160,11 +160,12 @@ class _Turn:
         return out or {"note": "No matching text in uploaded documents"}
 
     def compare_suppliers(self, supplier_ids: list[int]):
-        return [{"id": sid, "name": self._sup(sid).name,
+        sups = [self._sup(sid) for sid in supplier_ids[:4]]  # sup.id, not sid: the model may send "2" for 2
+        return [{"id": sup.id, "name": sup.name,
                  **({"overall_score": r.overall_score, "classification": r.classification,
                      "categories": {c: v.score for c, v in r.categories.items()}}
-                    if (r := queries.risk(self.db, sid)) else {"classification": "not_assessed"})}
-                for sid in supplier_ids[:4]]
+                    if (r := queries.risk(self.db, sup.id)) else {"classification": "not_assessed"})}
+                for sup in sups]
 
     def get_missing_documents(self, supplier_id: int):
         sup = self._sup(supplier_id)
