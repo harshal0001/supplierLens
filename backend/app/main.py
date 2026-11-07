@@ -1,17 +1,17 @@
 import importlib.util
 import logging
 from contextlib import asynccontextmanager
-from datetime import UTC, datetime
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import text, update
+from sqlalchemy import select, text
 
 from app import db as dbmod
 from app import errors
 from app.api import analysis, assistant, suppliers
 from app.config import settings
 from app.models import AnalysisRun
+from app.services import analysis as analysis_svc
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 
@@ -20,9 +20,10 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name
 async def lifespan(_: FastAPI):
     dbmod.Base.metadata.create_all(dbmod.engine)
     with dbmod.SessionLocal() as db:  # background runs don't survive a restart
-        db.execute(update(AnalysisRun).where(AnalysisRun.status.in_(["queued", "running"]))
-                   .values(status="failed", error="interrupted", finished_at=datetime.now(UTC)))
-        db.commit()
+        active = db.scalars(select(AnalysisRun.id).where(AnalysisRun.status.in_(["queued", "running"]))).all()
+    for run_id in active:  # same as a crash: the run and its running step become failed
+        analysis_svc._mark_failed(run_id, "interrupted")
+    with dbmod.SessionLocal() as db:
         # At most one active run per supplier, enforced by the DB (two fast "Analyze" clicks race otherwise).
         db.execute(text("CREATE UNIQUE INDEX IF NOT EXISTS uq_active_run ON analysis_runs (supplier_id) "
                         "WHERE status IN ('queued', 'running')"))

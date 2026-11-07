@@ -1,11 +1,12 @@
 """Voice proxy (CONTRACT §4): ElevenLabs Speech-to-Text and Text-to-Speech. The API key never reaches the browser."""
 
 import logging
+from typing import Annotated
 
 import httpx
 from fastapi import APIRouter, Depends, File, Form, UploadFile
 from fastapi.responses import Response
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, StringConstraints
 
 from app.api.assistant import rate_limit
 from app.config import settings
@@ -57,7 +58,7 @@ def transcribe(audio: UploadFile = File(...), language: str | None = Form(None))
 
 
 class SpeakBody(BaseModel):
-    text: str = Field(min_length=1, max_length=2000)
+    text: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=2000)]  # blank → 422, no paid call
 
 
 @router.post("/speak", response_class=Response, responses={200: {"content": {"audio/mpeg": {}}}})

@@ -16,7 +16,7 @@ router = APIRouter(prefix="/api")
 
 
 @router.post("/suppliers/{supplier_id}/analyze", response_model=s.AnalysisRunOut, status_code=202)
-def analyze(supplier_id: int, bg: BackgroundTasks, db: Session = Depends(get_db)):
+def analyze(supplier_id: s.DbId, bg: BackgroundTasks, db: Session = Depends(get_db)):
     queries.supplier_or_404(db, supplier_id)
 
     def active():
@@ -40,7 +40,7 @@ def analyze(supplier_id: int, bg: BackgroundTasks, db: Session = Depends(get_db)
 
 
 @router.get("/runs/{run_id}", response_model=s.AnalysisRunOut)
-def get_run(run_id: int, db: Session = Depends(get_db)):
+def get_run(run_id: s.DbId, db: Session = Depends(get_db)):
     run = db.get(AnalysisRun, run_id)
     if run is None:
         raise AppError(404, "Run not found")
@@ -48,7 +48,7 @@ def get_run(run_id: int, db: Session = Depends(get_db)):
 
 
 @router.get("/suppliers/{supplier_id}/risk", response_model=s.RiskAssessment)
-def get_risk(supplier_id: int, db: Session = Depends(get_db)):
+def get_risk(supplier_id: s.DbId, db: Session = Depends(get_db)):
     queries.supplier_or_404(db, supplier_id)
     r = queries.risk(db, supplier_id)
     if r is None:
@@ -57,25 +57,25 @@ def get_risk(supplier_id: int, db: Session = Depends(get_db)):
 
 
 @router.get("/suppliers/{supplier_id}/risk/history", response_model=list[s.RiskHistoryPoint])
-def get_risk_history(supplier_id: int, db: Session = Depends(get_db)):
+def get_risk_history(supplier_id: s.DbId, db: Session = Depends(get_db)):
     queries.supplier_or_404(db, supplier_id)
     return queries.risk_history(db, supplier_id)
 
 
 @router.get("/suppliers/{supplier_id}/signals", response_model=list[s.ExternalSignalOut])
-def get_signals(supplier_id: int, db: Session = Depends(get_db)):
+def get_signals(supplier_id: s.DbId, db: Session = Depends(get_db)):
     queries.supplier_or_404(db, supplier_id)
     return queries.signals(db, supplier_id)
 
 
 @router.get("/suppliers/{supplier_id}/actions", response_model=list[s.ActionItem])
-def get_actions(supplier_id: int, db: Session = Depends(get_db)):
+def get_actions(supplier_id: s.DbId, db: Session = Depends(get_db)):
     queries.supplier_or_404(db, supplier_id)
     return queries.actions(db, supplier_id)
 
 
 @router.patch("/actions/{action_id}", response_model=s.ActionItem)
-def patch_action(action_id: int, body: s.ActionPatch, db: Session = Depends(get_db)):
+def patch_action(action_id: s.DbId, body: s.ActionPatch, db: Session = Depends(get_db)):
     a = db.get(Action, action_id)
     if a is None:
         raise AppError(404, "Action not found")
