@@ -53,7 +53,13 @@ export function PushToTalk({
     if (recording && seconds >= MAX_SECONDS) recorder.current?.stop();
   }, [recording, seconds]);
 
-  useEffect(() => () => recorder.current?.stream.getTracks().forEach((track) => track.stop()), []);
+  useEffect(
+    () => () => {
+      cancelled.current = true; // left the page: don't send (or ask) a recording that ends after unmount
+      recorder.current?.stream.getTracks().forEach((track) => track.stop());
+    },
+    [],
+  );
 
   async function start() {
     if (starting.current) return;
@@ -107,6 +113,7 @@ export function PushToTalk({
       const body = new FormData();
       body.append("audio", blob, blob.type.includes("mp4") ? "question.mp4" : "question.webm");
       const { text } = await api<{ text: string }>("/api/voice/transcribe", { method: "POST", body });
+      if (cancelled.current) return;
       if (text) onTranscript(text);
       else {
         toast.error("I didn't catch that. Try again or type your question.");
@@ -124,7 +131,7 @@ export function PushToTalk({
     <Button
       type="button"
       variant={recording ? "destructive" : "outline"}
-      disabled={disabled || transcribing}
+      disabled={(disabled && !recording) || transcribing}
       aria-pressed={recording}
       aria-label={recording ? "Stop recording" : "Ask by voice"}
       onClick={() => (recording ? recorder.current?.stop() : void start())}
