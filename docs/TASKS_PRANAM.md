@@ -32,7 +32,7 @@ frontend/
 - [x] **P3. Suppliers** `/suppliers`: table (name + synthetic badge, country, category, criticality, risk badge + score, confidence bar, docs,
   last assessed). Search box (client-side filter). "Add supplier" dialog (name, country ISO-2, website, category, criticality). 409 → inline error.
 
-- [ ] **P4. Supplier detail** `/suppliers/[id]`: header with name, badges, large score gauge (0–100, coloured), classification, confidence +
+- [x] **P4. Supplier detail** `/suppliers/[id]`: header with name, badges, large score gauge (0–100, coloured), classification, confidence +
   coverage ("Based on 3 of 5 risk categories"), **Analyze** button.
   - **Documents card:** drag-and-drop + picker (PDF only, ≤ 20 MB, ≤ 10), document list with status chip/error, "missing documents" callout.
     After upload, auto-start analysis.

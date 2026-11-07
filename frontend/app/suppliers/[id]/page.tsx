@@ -1,11 +1,13 @@
+"use client";
+
+import { useParams } from "next/navigation";
+import { SupplierDetailView } from "@/components/suppliers/supplier-detail";
+
 export default function SupplierDetailPage() {
-  return (
-    <header className="space-y-1">
-      <p className="text-sm font-medium text-sky-800">Supplier</p>
-      <h1 className="text-2xl font-semibold tracking-tight">Supplier detail</h1>
-      <p className="max-w-xl text-sm text-muted-foreground">
-        Documents, risk evidence, web signals, and the action plan.
-      </p>
-    </header>
-  );
+  const params = useParams<{ id: string }>();
+  const supplierId = Number(params.id);
+  if (!Number.isFinite(supplierId)) {
+    return <p className="text-sm text-muted-foreground">Supplier not found.</p>;
+  }
+  return <SupplierDetailView key={supplierId} supplierId={supplierId} />;
 }
