@@ -19,7 +19,7 @@ frontend/
 
 ## Tasks
 
-- [ ] **P1. Scaffold (≤ 30 min)**: `pnpm create next-app frontend` (TS, App Router, Tailwind, ESLint), `shadcn init` + components (button, card,
+- [x] **P1. Scaffold (≤ 30 min)**: `pnpm create next-app frontend` (TS, App Router, Tailwind, ESLint), `shadcn init` + components (button, card,
   badge, table, dialog, input, select, tabs, progress, sonner, skeleton, tooltip), recharts, lucide-react. Copy CONTRACT §4 TS types into
   `lib/types.ts`. `lib/api.ts`: `api<T>(path, init?)` → base `NEXT_PUBLIC_API_URL`, throws `{status, code, message}` from the error shape,
   and when `NEXT_PUBLIC_API_MOCK=1` returns data from `lib/mocks.ts`. Mocks: 6 suppliers covering low/medium/high/insufficient_data/never analysed,
