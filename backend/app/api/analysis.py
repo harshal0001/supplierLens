@@ -105,6 +105,8 @@ def dashboard(db: Session = Depends(get_db)):
                                              standard=key[1], expires_on=c["expires_on"], days_left=(exp - today).days)
     expiring = sorted((c for c in certs.values() if c.days_left <= 90), key=lambda c: c.days_left)
 
+    open_actions = queries.actions(db, open_only=True)
+    totals.update(open_actions=len(open_actions), open_high_priority=sum(a.priority == "high" for a in open_actions))
     return s.Dashboard(totals=s.DashboardTotals(**totals),
                        top_risk=[x for x in sups if x.overall_score is not None][:5],
-                       certifications=expiring, open_actions=queries.actions(db, open_only=True)[:8])
+                       certifications=expiring, open_actions=open_actions[:8])
