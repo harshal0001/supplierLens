@@ -69,6 +69,11 @@ def risk(db: Session, supplier_id: int) -> s.RiskAssessment | None:
                             summary=a.summary, created_at=a.created_at)
 
 
+def risk_history(db: Session, supplier_id: int) -> list[s.RiskHistoryPoint]:
+    rows = db.scalars(select(Assessment).where(Assessment.supplier_id == supplier_id).order_by(Assessment.id)).all()
+    return [s.RiskHistoryPoint.model_validate(a) for a in rows]
+
+
 def signal_out(x: ExternalSignal) -> s.ExternalSignalOut:
     cat, sev = SIGNAL_RULES.get(x.signal_type, (None, None))
     return s.ExternalSignalOut(id=x.id, title=x.title, url=x.url, published_at=x.published_at,

@@ -56,6 +56,12 @@ def get_risk(supplier_id: int, db: Session = Depends(get_db)):
     return r
 
 
+@router.get("/suppliers/{supplier_id}/risk/history", response_model=list[s.RiskHistoryPoint])
+def get_risk_history(supplier_id: int, db: Session = Depends(get_db)):
+    queries.supplier_or_404(db, supplier_id)
+    return queries.risk_history(db, supplier_id)
+
+
 @router.get("/suppliers/{supplier_id}/signals", response_model=list[s.ExternalSignalOut])
 def get_signals(supplier_id: int, db: Session = Depends(get_db)):
     queries.supplier_or_404(db, supplier_id)

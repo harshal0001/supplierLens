@@ -85,6 +85,19 @@ def test_research_failure_does_not_fail_run(client, fakes, monkeypatch):
     assert run["steps"][1] == {"name": "external_research", "status": "failed", "error": "Exa down"}
 
 
+def test_risk_history(client, fakes):
+    sid = make_supplier(client)
+    assert client.get(f"/api/suppliers/{sid}/risk/history").json() == []
+    assert client.get("/api/suppliers/999/risk/history").status_code == 404
+    client.post(f"/api/suppliers/{sid}/documents", files=[("files", ("otd_report.pdf", PDF, "application/pdf"))])
+    run_analysis(client, sid)
+    run_analysis(client, sid)
+    hist = client.get(f"/api/suppliers/{sid}/risk/history").json()
+    assert len(hist) == 2 and hist[0]["id"] < hist[1]["id"]
+    assert hist[-1]["overall_score"] == client.get(f"/api/suppliers/{sid}/risk").json()["overall_score"]
+    assert set(hist[0]) == {"id", "overall_score", "classification", "confidence", "coverage", "created_at"}
+
+
 def test_upload_validation(client):
     sid = make_supplier(client)
     bad = client.post(f"/api/suppliers/{sid}/documents", files=[("files", ("x.pdf", b"hello", "application/pdf"))])

@@ -732,6 +732,17 @@ export function mockApi<T>(path: string, init?: RequestInit): T {
     return assessment as T;
   }
 
+  const historyMatch = url.match(/^\/api\/suppliers\/(\d+)\/risk\/history$/);
+  if (historyMatch && method === "GET") {
+    const id = Number(historyMatch[1]);
+    findSupplier(id);
+    const a = assessments.get(id);
+    if (!a) return [] as T;
+    const point = { id: a.id, overall_score: a.overall_score, classification: a.classification, confidence: a.confidence, coverage: a.coverage, created_at: a.created_at };
+    const earlier = { ...point, id: 0, overall_score: 60, classification: "medium" as const, coverage: 0.55, created_at: "2026-11-05T15:00:00.000Z" };
+    return [earlier, point] as T;
+  }
+
   const signalsMatch = url.match(/^\/api\/suppliers\/(\d+)\/signals$/);
   if (signalsMatch && method === "GET") {
     return (signalsBySupplier.get(Number(signalsMatch[1])) ?? []) as T;
