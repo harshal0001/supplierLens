@@ -173,3 +173,11 @@ def test_delta_like_contract_only_is_insufficient():
     a = re_.score(xs)  # before the rule: coverage 0.55, overall 37.3 medium
     assert a.coverage == 0.3 and a.classification == "insufficient_data" and a.overall_score == 35.0
     assert a.categories["operational"]["score"] is None and a.categories["operational"]["indicator_count"] == 1
+
+
+def test_same_concern_in_two_documents_counts_once():
+    from app.facts import Concern
+    c = Concern(category="operational", text="Capacity shortage", quote="line 2 runs at reduced capacity", page=1)
+    twice = [DocInput(1, "a.pdf", DocumentExtraction(doc_type="other", concerns=[c])),
+             DocInput(2, "a (1).pdf", DocumentExtraction(doc_type="other", concerns=[c]))]
+    assert len(ind("ai_concern", twice)) == 1

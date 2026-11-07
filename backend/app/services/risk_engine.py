@@ -189,12 +189,15 @@ def build_indicators(supplier: SupplierInput, docs: list[DocInput], signals: lis
                         "single source", 70, d, ss)
                 break
 
-    # --- AI-interpreted concerns (skip ones that just restate a quote already used as a fact)
+    # --- AI-interpreted concerns: skip ones restating a quote already used (as a fact, or by an earlier concern,
+    # e.g. the same PDF uploaded twice)
     used = {re.sub(r"\s+", " ", e["excerpt"]).strip().lower() for i in out for e in i.evidence}
     for d in docs:
         for c in d.extraction.concerns:
-            if re.sub(r"\s+", " ", c.quote).strip().lower() in used:
+            key = re.sub(r"\s+", " ", c.quote).strip().lower()
+            if key in used:
                 continue
+            used.add(key)
             out.append(IndicatorDraft(c.category, "ai_concern", c.text, None, 40, CONF["ai_interpretation"],
                                       "ai_interpretation", [_ev_doc(d, c)]))
 
