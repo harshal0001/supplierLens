@@ -14,10 +14,11 @@ log = logging.getLogger("supplierlens.extraction")
 MAX_PAGES = 100
 MAX_CHARS = 150_000  # ~40k tokens sent to the LLM
 CHUNK_CHARS = 4000
+MAX_CONCERNS = 5
 
 _DOC_TYPE_PATTERNS = [
     ("financial_report", r"financ|annual|bilanz|jahresabschluss"),
-    ("certification", r"iso|cert|iatf|zertifikat"),
+    ("certification", r"(?<![a-z])iso|cert|iatf|zertifikat"),  # not "revision"/"supervisor"
     ("delivery_report", r"deliver|otd|performance|quality|liefer"),
     ("contract", r"contract|vertrag|agreement"),
 ]
@@ -81,7 +82,7 @@ def verify_quotes(ex: DocumentExtraction, pages: list[tuple[int, str]]) -> Docum
             if not ok(getattr(block, name)):
                 setattr(block, name, None)
     ex.certifications = [c for c in ex.certifications if ok(c)]
-    ex.concerns = [c for c in ex.concerns if ok(c)]
+    ex.concerns = [c for c in ex.concerns if ok(c)][:MAX_CONCERNS]
     return ex
 
 
@@ -101,9 +102,9 @@ def extract_facts(pages: list[tuple[int, str]], filename: str) -> DocumentExtrac
     for n, t in pages:
         if used + len(t) > MAX_CHARS:
             break
-        body.append(f"[page {n}]\n{t}")
+        body.append(f"[page {n}]\n{llm.fence(t)}")
         used += len(t)
-    user = (f"Today is {date.today().isoformat()}. File name: {filename}\n"
+    user = (f"Today is {date.today().isoformat()}. File name: {llm.attr(filename)}\n"
             f"<untrusted_document>\n{chr(10).join(body)}\n</untrusted_document>")
     ex = llm.structured(SYSTEM, user, DocumentExtraction)
     return verify_quotes(ex, pages)

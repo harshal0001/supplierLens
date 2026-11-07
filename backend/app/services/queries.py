@@ -52,7 +52,8 @@ def supplier_detail(db: Session, sup: Supplier) -> s.SupplierDetail:
     return s.SupplierDetail(
         **summaries(db, [sup])[0].model_dump(), website=sup.website,
         documents=[s.SupplierDocument.model_validate(d) for d in docs],
-        missing_documents=missing_documents({d.doc_type for d in docs}, sup.criticality),
+        # Only processed documents count as "on file" (same rule the scoring/action plan uses).
+        missing_documents=missing_documents({d.doc_type for d in docs if d.status == "processed"}, sup.criticality),
         latest_run=s.AnalysisRunOut.model_validate(run) if run else None)
 
 

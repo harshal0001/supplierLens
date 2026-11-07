@@ -5,7 +5,7 @@ from datetime import UTC, datetime
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import update
+from sqlalchemy import text, update
 
 from app import db as dbmod
 from app import errors
@@ -22,6 +22,10 @@ async def lifespan(_: FastAPI):
     with dbmod.SessionLocal() as db:  # background runs don't survive a restart
         db.execute(update(AnalysisRun).where(AnalysisRun.status.in_(["queued", "running"]))
                    .values(status="failed", error="interrupted", finished_at=datetime.now(UTC)))
+        db.commit()
+        # At most one active run per supplier, enforced by the DB (two fast "Analyze" clicks race otherwise).
+        db.execute(text("CREATE UNIQUE INDEX IF NOT EXISTS uq_active_run ON analysis_runs (supplier_id) "
+                        "WHERE status IN ('queued', 'running')"))
         db.commit()
     yield
 

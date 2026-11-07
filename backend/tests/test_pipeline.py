@@ -121,7 +121,9 @@ def test_assistant_citations(client, fakes, monkeypatch):
         if len(calls) == 2:
             return _msg(NS(type="tool_use", id="t2", name="propose_action",
                            input={"supplier_id": sid, "title": "Call Alpha", "rationale": "Low OTD"}))
-        result = json.loads(kw["messages"][2]["content"][0]["content"])
+        raw = kw["messages"][2]["content"][0]["content"]
+        assert raw.startswith("<untrusted_document>")
+        result = json.loads(raw.removeprefix("<untrusted_document>").removesuffix("</untrusted_document>"))
         real = result["indicators"][0]["evidence"][0]["evidence_id"]
         return _msg(NS(type="text", text=f"Alpha is high risk [E:{real}] and fake [E:deadbeef]."))
 
