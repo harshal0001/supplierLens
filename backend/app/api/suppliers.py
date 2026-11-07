@@ -1,4 +1,5 @@
 import uuid
+from pathlib import Path
 
 from fastapi import APIRouter, Depends, File, UploadFile
 from fastapi.responses import FileResponse
@@ -75,7 +76,7 @@ def upload_documents(supplier_id: s.DbId, files: list[UploadFile] = File(...), d
 @router.get("/documents/{document_id}/file")
 def document_file(document_id: s.DbId, db: Session = Depends(get_db)):
     doc = db.get(Document, document_id)
-    if doc is None:
+    if doc is None or not Path(doc.storage_path).is_file():  # a deleted upload is a 404, not a 500
         raise AppError(404, "Document not found")
     # filename= lets Starlette RFC 5987-encode non-Latin-1 names (a raw header would crash on "–" or CJK)
     return FileResponse(doc.storage_path, media_type="application/pdf", filename=doc.filename,
