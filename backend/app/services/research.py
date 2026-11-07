@@ -59,6 +59,15 @@ def _norm(s: str) -> str:
     return re.sub(r"\s+", " ", s or "").strip().lower()
 
 
+_LEGAL_FORM = re.compile(r"\b(gmbh|ag|ab|se|kg|kgaa|co|inc|ltd|llc|plc|sa|s\.a|spa|bv|nv|oy|as)\b\.?", re.IGNORECASE)
+
+
+def core_name(name: str) -> str:
+    """'Northvolt AB' -> 'northvolt': news rarely repeats the legal form, so match without it."""
+    core = _norm(_LEGAL_FORM.sub(" ", name).replace("&", " ").strip(" ,.-"))
+    return core or _norm(name)
+
+
 def _parse_date(s: str | None) -> datetime | None:
     if not s:
         return None
@@ -73,7 +82,7 @@ def research(db: Session, supplier: Supplier) -> list[ExternalSignal]:
     queries = [f"{supplier.name} insolvency, restructuring, layoffs, plant closure, recall or sanctions",
                f"{supplier.name} company news"]
     seen, results = set(), []
-    name = _norm(supplier.name)
+    name = core_name(supplier.name)
     for q in queries:
         for r in _search(q, start):
             if r.url in seen or name not in _norm(r.text) + " " + _norm(r.title):

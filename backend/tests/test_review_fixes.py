@@ -154,3 +154,53 @@ def test_concerns_truncated_not_rejected():
         Concern(category="operational", text=f"r{i}", quote=f"risk {w}", page=1)
         for i, w in enumerate(["one", "two", "three", "four", "five", "six", "seven"])])
     assert len(extraction.verify_quotes(ex, pages).concerns) == 5
+
+
+# ponytail review 1 — legal forms don't block the entity match
+@pytest.mark.parametrize("name,core", [("Northvolt AB", "northvolt"), ("Siemens AG", "siemens"),
+                                       ("Bosch & Co. KG", "bosch"), ("Alpha Präzisionsteile GmbH", "alpha präzisionsteile"),
+                                       ("GmbH", "gmbh")])
+def test_core_name(name, core):
+    assert research_mod.core_name(name) == core
+
+
+def test_research_matches_without_legal_form(client, monkeypatch):
+    res = [_result(0, "Northvolt filed for bankruptcy in Sweden in March 2025, the company said.")]
+    monkeypatch.setattr(research_mod, "_search", lambda q, start: res)
+    monkeypatch.setattr(llm, "structured", lambda *a, **k: research_mod.Classification(results=[
+        research_mod.ClassifiedResult(index=0, signal_type="insolvency_or_bankruptcy", claim="Bankruptcy",
+                                      excerpt="Northvolt filed for bankruptcy in Sweden in March 2025", relevance=0.9)]))
+    with dbmod.SessionLocal() as db:
+        sup = Supplier(name="Northvolt AB", name_key="northvolt ab", country="SE")
+        db.add(sup)
+        db.commit()
+        (sig,) = research_mod.research(db, sup)
+        assert sig.verification_status == "source_confirmed"
+
+
+# ponytail review 2 — the double-click race returns the run the other request created
+def test_analyze_race_returns_competing_run(client, monkeypatch):
+    sid = make_supplier(client)
+    monkeypatch.setattr(analysis, "run", lambda run_id: None)  # don't execute the pipeline
+    competing = {}
+    real_new_steps = analysis.new_steps
+
+    def other_request_wins():
+        with dbmod.SessionLocal() as other:  # simulates the concurrent request committing first
+            r = AnalysisRun(supplier_id=sid, steps=real_new_steps())
+            other.add(r)
+            other.commit()
+            competing["id"] = r.id
+        return real_new_steps()
+
+    monkeypatch.setattr(analysis, "new_steps", other_request_wins)
+    r = client.post(f"/api/suppliers/{sid}/analyze")
+    assert r.status_code == 202 and r.json()["id"] == competing["id"]
+
+
+# ponytail review 4 — a document still being processed is not reported as missing
+def test_uploaded_document_not_missing_before_analysis(client):
+    sid = make_supplier(client)
+    client.post(f"/api/suppliers/{sid}/documents",
+                files=[("files", ("annual_financial_report.pdf", PDF, "application/pdf"))])
+    assert "financial_report" not in client.get(f"/api/suppliers/{sid}").json()["missing_documents"]
