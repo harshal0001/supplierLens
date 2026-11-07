@@ -426,7 +426,9 @@ export function SupplierDetailView({ supplierId }: { supplierId: number }) {
                   <CardTitle>{notAssessed ? "Not assessed" : categoryScore.score?.toFixed(0)}</CardTitle>
                   <CardDescription>
                     {notAssessed
-                      ? "Not assessed, no evidence"
+                      ? categoryScore?.indicator_count
+                        ? "Not assessed. AI interpretation only"
+                        : "Not assessed, no evidence"
                       : `Weight ${Math.round(categoryScore.weight * 100)}% · confidence ${Math.round(categoryScore.confidence * 100)}%`}
                   </CardDescription>
                 </CardHeader>

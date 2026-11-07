@@ -22,7 +22,7 @@ Checklist:
 - [ ] Ask one warm-up question on the Assistant page, then reload the page so the chat is empty
 - [ ] Sound on, volume up
 - [ ] `demo-data/alpha-delivery-performance.pdf` visible in the file explorer, ready to drag
-- [ ] Expected state: Alpha **60.0 medium**, Beta 39.0 medium, Gamma 11.7 low, Delta 37.3 medium
+- [ ] Expected state: Alpha **60.0 medium**, Beta 39.0 medium, Gamma 11.7 low, Delta **insufficient data**
 
 ## 1. The problem (30 s, slide 2)
 > "A manufacturer with 50 suppliers keeps the information it needs to judge them in PDFs, spreadsheets and the news. By the time someone reads it, the supplier is already late."

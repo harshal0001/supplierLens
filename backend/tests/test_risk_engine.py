@@ -143,3 +143,33 @@ def test_concern_restating_a_fact_is_skipped():
             concerns=[Concern(category="delivery", text="Late deliveries", quote=q, page=1),
                       Concern(category="operational", text="Staff shortage", quote="line 2 reduced", page=1)])
     assert [i.label for i in ind("ai_concern", [d])] == ["Staff shortage"]
+
+
+def AI(cat, sev=40):
+    return IndicatorDraft(cat, "ai_concern", "l", None, sev, 0.4, "ai_interpretation")
+
+
+@pytest.mark.parametrize("xs,cat,score,conf,count,coverage", [
+    # AI-only category: not assessed, excluded from coverage, indicators still counted
+    ([AI("operational")], "operational", None, 0.0, 1, 0),
+    ([AI("operational"), AI("operational", 90), I("external", 10, 0.7)], "operational", None, 0.0, 2, 0.15),
+    # assessed category: AI indicator still counts in mean and confidence (unchanged)
+    ([I("operational", 70, 0.9), AI("operational")], "operational", 70, 0.94, 2, 0.25),
+    ([I("operational", 50, 0.5), AI("operational")], "operational", 45.56, 0.7, 2, 0.25),
+])
+def test_ai_only_category_not_assessed(xs, cat, score, conf, count, coverage):
+    a = re_.score(xs)
+    c = a.categories[cat]
+    assert (c["score"], c["confidence"], c["indicator_count"], a.coverage) == (score, conf, count, coverage)
+
+
+def test_delta_like_contract_only_is_insufficient():
+    from app.facts import Concern
+    d = doc(contract=ContractTerms(single_source=BoolFact(value=True, quote="sole supplier", page=1)),
+            concerns=[Concern(category="operational", text="Single-source dependency", quote="sole supplier", page=1)])
+    xs = re_.build_indicators(SupplierInput(name="Delta", country="DE", criticality="medium"), [d], [], TODAY)
+    assert {(i.category, i.basis) for i in xs} == {("compliance", "document_fact"), ("external", "reference_data"),
+                                                   ("operational", "ai_interpretation")}
+    a = re_.score(xs)  # before the rule: coverage 0.55, overall 37.3 medium
+    assert a.coverage == 0.3 and a.classification == "insufficient_data" and a.overall_score == 35.0
+    assert a.categories["operational"]["score"] is None and a.categories["operational"]["indicator_count"] == 1
