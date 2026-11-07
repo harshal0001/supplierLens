@@ -181,3 +181,9 @@ def test_same_concern_in_two_documents_counts_once():
     twice = [DocInput(1, "a.pdf", DocumentExtraction(doc_type="other", concerns=[c])),
              DocInput(2, "a (1).pdf", DocumentExtraction(doc_type="other", concerns=[c]))]
     assert len(ind("ai_concern", twice)) == 1
+
+
+def test_missing_iso_evidence_wording():
+    assert ind("iso9001_missing", [])[0].evidence[0]["excerpt"] == "No documents have been uploaded yet."
+    one = ind("iso9001_missing", [doc()])[0].evidence[0]["excerpt"]
+    assert one == "None of the 1 processed document contains an ISO 9001 certificate."

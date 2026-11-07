@@ -177,8 +177,9 @@ def build_indicators(supplier: SupplierInput, docs: list[DocInput], signals: lis
     if "ISO 9001" not in certs:
         out.append(IndicatorDraft("compliance", "iso9001_missing", "No ISO 9001 certificate on file", None, 60,
                                   CONF["document_fact"], "document_fact",
-                                  [_ev_ref("Document check", f"None of the {len(docs)} processed documents "
-                                                             "contains an ISO 9001 certificate.")]))
+                                  [_ev_ref("Document check", "No documents have been uploaded yet." if not docs else
+                                           f"None of the {len(docs)} processed document{'s' if len(docs) > 1 else ''} "
+                                           "contains an ISO 9001 certificate.")]))
 
     # --- operational: single-source dependency on a critical supplier
     if supplier.criticality == "high":
