@@ -29,7 +29,7 @@ frontend/
 - [x] **P2. Dashboard** `/dashboard`: KPI cards (total, high, medium, low, not assessed), risk distribution donut (Recharts), top-5 risk table
   (click → supplier), expiring/expired certifications (red if expired), open actions with Approve/Reject buttons (PATCH). Empty state with "Add supplier".
 
-- [ ] **P3. Suppliers** `/suppliers`: table (name + synthetic badge, country, category, criticality, risk badge + score, confidence bar, docs,
+- [x] **P3. Suppliers** `/suppliers`: table (name + synthetic badge, country, category, criticality, risk badge + score, confidence bar, docs,
   last assessed). Search box (client-side filter). "Add supplier" dialog (name, country ISO-2, website, category, criticality). 409 → inline error.
 
 - [ ] **P4. Supplier detail** `/suppliers/[id]`: header with name, badges, large score gauge (0–100, coloured), classification, confidence +
