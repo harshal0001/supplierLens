@@ -47,6 +47,7 @@ export function AssistantView({ initialSupplierId }: { initialSupplierId: number
   const [speaking, setSpeaking] = useState(false);
   const [openCitation, setOpenCitation] = useState<string | null>(null);
   const audio = useRef<HTMLAudioElement | null>(null);
+  const audioUrl = useRef<string | null>(null);
   const bottom = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -61,6 +62,8 @@ export function AssistantView({ initialSupplierId }: { initialSupplierId: number
   function stopSpeaking() {
     audio.current?.pause();
     audio.current = null;
+    if (audioUrl.current) URL.revokeObjectURL(audioUrl.current);
+    audioUrl.current = null;
     setSpeaking(false);
     setStatus("");
   }
@@ -73,8 +76,8 @@ export function AssistantView({ initialSupplierId }: { initialSupplierId: number
       const url = URL.createObjectURL(blob);
       const player = new Audio(url);
       audio.current = player;
+      audioUrl.current = url;
       player.onended = () => {
-        URL.revokeObjectURL(url);
         if (audio.current === player) stopSpeaking();
       };
       setSpeaking(true);
@@ -82,7 +85,9 @@ export function AssistantView({ initialSupplierId }: { initialSupplierId: number
       await player.play();
     } catch (cause) {
       stopSpeaking();
-      toast.error(asApiFailure(cause).message, { id: "speak" });
+      // Safari blocks audio that starts after a network wait; the user can press Play instead.
+      const blocked = cause instanceof DOMException && cause.name === "NotAllowedError";
+      toast.error(blocked ? "Press Play to hear the answer." : asApiFailure(cause).message, { id: "speak" });
     }
   }
 

@@ -31,6 +31,7 @@ export function PushToTalk({
   const [seconds, setSeconds] = useState(0);
   const recorder = useRef<MediaRecorder | null>(null);
   const cancelled = useRef(false);
+  const starting = useRef(false); // a 2nd click during the permission prompt would start a 2nd mic stream
 
   useEffect(() => {
     if (!recording) return;
@@ -55,6 +56,16 @@ export function PushToTalk({
   useEffect(() => () => recorder.current?.stream.getTracks().forEach((track) => track.stop()), []);
 
   async function start() {
+    if (starting.current) return;
+    starting.current = true;
+    try {
+      await begin();
+    } finally {
+      starting.current = false;
+    }
+  }
+
+  async function begin() {
     const mime = pickMime();
     if (mime == null || !navigator.mediaDevices?.getUserMedia) {
       toast.error("Voice input isn't supported in this browser. Type your question instead.");
