@@ -3,7 +3,7 @@
 You own `frontend/`, `demo-data/`, `scripts/`, `backend/app/api/voice.py`, `docs/DEMO_SCRIPT.md` and the pitch deck. Read
 `docs/CONTRACT.md` first. Build against **mock data** in the exact §4 shapes until Harshal says the API is live (≈ T+3:30), then
 set `NEXT_PUBLIC_API_MOCK=0`. Work top to bottom and tick `[x]` here when a task is done. After each task: `pnpm lint && pnpm build`,
-then commit, `git pull --rebase`, `git push`. Check the current Next.js 16, shadcn/ui and ElevenLabs docs before using them.
+then follow the branch → PR → merge workflow in `CLAUDE.md` §3. Check the current Next.js 16, shadcn/ui and ElevenLabs docs before using them.
 
 Design: premium B2B, navy + white (CONCEPT §10), clean and data-rich. Risk colours: low green, medium amber, high red,
 **not assessed / insufficient data = grey with dashed border, never green**. Labels: "AI-generated" on summaries,

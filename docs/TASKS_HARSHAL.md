@@ -2,7 +2,7 @@
 
 You own `backend/` (except `backend/app/api/voice.py`, which is Pranam's). Read `docs/CONTRACT.md` first. API shapes in §4 are
 exact, because Pranam's frontend is built against them. Work top to bottom and tick `[x]` here when a task is done. After each task:
-`uv run pytest -q`, then commit, `git pull --rebase`, `git push`. Check the current Anthropic and Exa SDK docs before calling them.
+`uv run pytest -q`, then follow the branch → PR → merge workflow in `CLAUDE.md` §3. Check the current Anthropic and Exa SDK docs before calling them.
 
 Layout:
 ```
