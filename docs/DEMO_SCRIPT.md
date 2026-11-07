@@ -12,7 +12,10 @@ Slides: [SupplierLens Pitch deck](https://claude.ai/artifact/7uqQni1T9a6PZBpjXnd
 cd backend && rm -rf data && uv run uvicorn app.main:app --port 8000
 # terminal 2 — frontend (production build is faster and calmer than dev)
 cd frontend && pnpm build && pnpm start -p 3000
-# terminal 3 — seed 4 synthetic suppliers, holding back Alpha's delivery report for the live upload (~60 s)
+# terminal 3 — regenerate the demo PDFs first: their certificate dates are relative to TODAY
+#   (Beta "expires in 30 days", Alpha "expired 2 months ago"), so PDFs made on another day show wrong numbers
+uv run --with fpdf2 python scripts/make_demo_docs.py
+# then seed 4 synthetic suppliers, holding back Alpha's delivery report for the live upload (~60 s)
 python3 scripts/seed_demo.py --skip alpha-delivery-performance.pdf
 ```
 
