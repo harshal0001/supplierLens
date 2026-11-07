@@ -189,3 +189,18 @@ def test_dashboard_counts_all_open_actions_not_just_the_listed_8(client):
     d = client.get("/api/dashboard").json()
     assert len(d["open_actions"]) == 8
     assert d["totals"]["open_actions"] == 11 and d["totals"]["open_high_priority"] == 4
+
+
+def test_duplicate_upload_rejected_with_clear_message(client):
+    sid = make_supplier(client)
+    ok = client.post(f"/api/suppliers/{sid}/documents", files=[("files", ("report.pdf", PDF, "application/pdf"))])
+    assert ok.status_code == 201
+    again = client.post(f"/api/suppliers/{sid}/documents", files=[("files", ("copy.pdf", PDF, "application/pdf"))])
+    assert again.status_code == 409 and "already uploaded" in again.json()["error"]["message"]
+    twice = client.post(f"/api/suppliers/{sid}/documents",
+                        files=[("files", ("a.pdf", PDF + b"x", "application/pdf")), ("files", ("b.pdf", PDF + b"x", "application/pdf"))])
+    assert twice.status_code == 409  # duplicate inside one request
+    assert len(client.get(f"/api/suppliers/{sid}").json()["documents"]) == 1  # nothing added by the rejected uploads
+    other = make_supplier(client, name="Other GmbH")
+    assert client.post(f"/api/suppliers/{other}/documents",
+                       files=[("files", ("report.pdf", PDF, "application/pdf"))]).status_code == 201  # per supplier

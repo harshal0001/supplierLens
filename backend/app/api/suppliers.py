@@ -1,8 +1,10 @@
+import hashlib
 import uuid
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, File, UploadFile
 from fastapi.responses import FileResponse
+from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -47,6 +49,10 @@ def upload_documents(supplier_id: s.DbId, files: list[UploadFile] = File(...), d
         raise AppError(400, f"Upload between 1 and {MAX_FILES} files")
     limit = settings.max_upload_mb * 1024 * 1024
     settings.upload_dir.mkdir(parents=True, exist_ok=True)
+    # shortcut: hashes existing files on each upload (fine for a few dozen docs); store a sha256 column with migrations
+    seen = {hashlib.sha256(Path(d.storage_path).read_bytes()).hexdigest()
+            for d in db.scalars(select(Document).where(Document.supplier_id == supplier_id))
+            if Path(d.storage_path).is_file()}
     saved, written = [], []
     try:
         for f in files:
@@ -55,6 +61,10 @@ def upload_documents(supplier_id: s.DbId, files: list[UploadFile] = File(...), d
                 raise AppError(413, f"{f.filename} is larger than {settings.max_upload_mb} MB")
             if not data.startswith(b"%PDF-"):
                 raise AppError(415, f"{f.filename} is not a PDF")
+            digest = hashlib.sha256(data).hexdigest()
+            if digest in seen:  # same content again: re-analysing it would change nothing and cost an LLM call
+                raise AppError(409, f"{f.filename} is already uploaded for this supplier. Nothing was added.")
+            seen.add(digest)
             # Server-generated name; the original filename is metadata only.
             path = settings.upload_dir / f"{uuid.uuid4().hex}.pdf"
             path.write_bytes(data)
