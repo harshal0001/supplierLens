@@ -48,13 +48,17 @@ export function AssistantView({ initialSupplierId }: { initialSupplierId: number
   const [openCitation, setOpenCitation] = useState<string | null>(null);
   const audio = useRef<HTMLAudioElement | null>(null);
   const audioUrl = useRef<string | null>(null);
+  const speakSeq = useRef(0); // bumped by stopSpeaking: a TTS reply that arrives after it is stale and must not play
   const bottom = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     api<SupplierSummary[]>("/api/suppliers")
       .then(setSuppliers)
       .catch((cause: unknown) => toast.error(asApiFailure(cause).message));
-    return () => audio.current?.pause();
+    return () => {
+      speakSeq.current += 1;
+      audio.current?.pause();
+    };
   }, []);
 
   useEffect(() => {
@@ -63,6 +67,7 @@ export function AssistantView({ initialSupplierId }: { initialSupplierId: number
   }, [messages]);
 
   function stopSpeaking() {
+    speakSeq.current += 1;
     audio.current?.pause();
     audio.current = null;
     if (audioUrl.current) URL.revokeObjectURL(audioUrl.current);
@@ -73,9 +78,11 @@ export function AssistantView({ initialSupplierId }: { initialSupplierId: number
 
   async function speak(text: string) {
     stopSpeaking();
+    const seq = speakSeq.current;
     try {
       setStatus("Preparing voice…");
       const blob = await api<Blob>("/api/voice/speak", { method: "POST", body: JSON.stringify({ text }) });
+      if (seq !== speakSeq.current) return; // a newer question, Play or Stop came in meanwhile
       const url = URL.createObjectURL(blob);
       const player = new Audio(url);
       audio.current = player;
@@ -87,6 +94,7 @@ export function AssistantView({ initialSupplierId }: { initialSupplierId: number
       setStatus("Speaking…");
       await player.play();
     } catch (cause) {
+      if (seq !== speakSeq.current) return;
       stopSpeaking();
       // Safari blocks audio that starts after a network wait; the user can press Play instead.
       const blocked = cause instanceof DOMException && cause.name === "NotAllowedError";
