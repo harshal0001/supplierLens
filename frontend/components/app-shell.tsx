@@ -57,7 +57,6 @@ export function AppShell({ children }: { children: ReactNode }) {
         <Link href="/dashboard" className="flex items-center gap-3 rounded-lg px-5 py-6 outline-none focus-visible:ring-3 focus-visible:ring-ring/50">
           <Logo className="size-9" />
           <div>
-            <p className="text-xs font-medium tracking-[0.16em] text-sidebar-foreground/60 uppercase">Procurement</p>
             <p className="text-lg leading-tight font-semibold tracking-tight">SupplierLens</p>
           </div>
         </Link>
